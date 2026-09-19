@@ -1,0 +1,247 @@
+{
+  "role_id": "data_analyst",
+  "title": "Data Analyst",
+  "category": "Data & Analytics",
+  "description": "Transforms raw business and transactional data into actionable operational insights, automated reports, and strategic intelligence using SQL, Python, Pandas, statistical analysis, and interactive visual dashboards.",
+  "target_readiness_threshold": 75,
+  "competencies": [
+    {
+      "competency_id": "comp_sql",
+      "title": "Relational Data Querying & SQL",
+      "required_score": 85,
+      "weight": 0.25,
+      "skills": [
+        {
+          "skill_id": "sql_fundamentals",
+          "title": "SQL Fundamentals & Filtering",
+          "required_score": 90,
+          "sub_skills": [
+            {
+              "sub_skill_id": "sql_select_where",
+              "title": "SELECT & WHERE Filtering",
+              "blooms_level": "Understand",
+              "learning_objective": "Understand and write structured SELECT statements with compound WHERE filtering conditions."
+            },
+            {
+              "sub_skill_id": "sql_data_types",
+              "title": "Data Casting & Type Coercion",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply CAST and CONVERT functions to normalize mismatched date, numeric, and string data types."
+            }
+          ]
+        },
+        {
+          "skill_id": "sql_joins",
+          "title": "Multi-Table Relational JOINs",
+          "required_score": 85,
+          "sub_skills": [
+            {
+              "sub_skill_id": "sql_inner_left_join",
+              "title": "INNER, LEFT & FULL OUTER JOINs",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply INNER and LEFT JOIN operations across normalized entity tables to combine customer and order records."
+            },
+            {
+              "sub_skill_id": "sql_join_cardinality",
+              "title": "Join Cardinality & Fan-out Prevention",
+              "blooms_level": "Analyze",
+              "learning_objective": "Analyze table relationships to diagnose and prevent Cartesian fan-out and duplicate aggregation."
+            }
+          ]
+        },
+        {
+          "skill_id": "sql_aggregation",
+          "title": "SQL Aggregation & Grouping",
+          "required_score": 85,
+          "sub_skills": [
+            {
+              "sub_skill_id": "sql_groupby_having",
+              "title": "GROUP BY & HAVING Clauses",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply GROUP BY aggregations with HAVING filters to summarize financial metrics across business regions."
+            }
+          ]
+        },
+        {
+          "skill_id": "sql_window_functions",
+          "title": "Advanced SQL Window Functions",
+          "required_score": 80,
+          "sub_skills": [
+            {
+              "sub_skill_id": "sql_row_number_rank",
+              "title": "ROW_NUMBER, RANK & DENSE_RANK",
+              "blooms_level": "Analyze",
+              "learning_objective": "Analyze partition orderings using ROW_NUMBER and DENSE_RANK to extract top revenue products per segment."
+            },
+            {
+              "sub_skill_id": "sql_lag_lead_running",
+              "title": "LAG, LEAD & Running Aggregates",
+              "blooms_level": "Evaluate",
+              "learning_objective": "Evaluate month-over-month performance trends using LAG, LEAD, and cumulative running totals."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "competency_id": "comp_python",
+      "title": "Python Programming & Pandas Analytics",
+      "required_score": 75,
+      "weight": 0.25,
+      "skills": [
+        {
+          "skill_id": "python_fundamentals",
+          "title": "Python Core & Functional Programming",
+          "required_score": 80,
+          "sub_skills": [
+            {
+              "sub_skill_id": "python_data_structures",
+              "title": "Lists, Dictionaries & Sets",
+              "blooms_level": "Understand",
+              "learning_objective": "Understand in-memory collection manipulation and nested dictionary lookups."
+            },
+            {
+              "sub_skill_id": "python_functions",
+              "title": "Modular Functions & Error Handling",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply clean parameter handling, type hints, and try-except blocks for robust pipeline execution."
+            }
+          ]
+        },
+        {
+          "skill_id": "pandas_data_manipulation",
+          "title": "Pandas DataFrames & Manipulation",
+          "required_score": 75,
+          "sub_skills": [
+            {
+              "sub_skill_id": "pandas_indexing_filtering",
+              "title": "DataFrame Slicing & Boolean Masking",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply vectorized boolean indexing with .loc and .iloc to subset complex multi-index DataFrames."
+            },
+            {
+              "sub_skill_id": "pandas_grouping_pivoting",
+              "title": "Groupby, Agg & Pivot Tables",
+              "blooms_level": "Analyze",
+              "learning_objective": "Analyze multi-attribute cohort patterns using DataFrame groupby, pivot tables, and cross-tabulations."
+            }
+          ]
+        },
+        {
+          "skill_id": "pandas_data_cleaning",
+          "title": "Applied Data Cleaning & Preprocessing",
+          "required_score": 75,
+          "sub_skills": [
+            {
+              "sub_skill_id": "missing_value_handling",
+              "title": "Missing Value Detection & Imputation",
+              "blooms_level": "Analyze",
+              "learning_objective": "Analyze missingness mechanisms (MCAR, MAR, MNAR) and apply sound forward-fill, median, or deletion strategies."
+            },
+            {
+              "sub_skill_id": "outlier_type_cleaning",
+              "title": "Data Type Casting & Outlier Treatment",
+              "blooms_level": "Evaluate",
+              "learning_objective": "Evaluate distributions using IQR and Z-scores to isolate anomalous sensor or transaction records."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "competency_id": "comp_statistics",
+      "title": "Applied Statistics & Exploratory Data Analysis",
+      "required_score": 70,
+      "weight": 0.20,
+      "skills": [
+        {
+          "skill_id": "descriptive_statistics",
+          "title": "Descriptive Statistics & Distributions",
+          "required_score": 75,
+          "sub_skills": [
+            {
+              "sub_skill_id": "central_tendency_variance",
+              "title": "Mean, Median, Skewness & Dispersion",
+              "blooms_level": "Understand",
+              "learning_objective": "Understand distributional shape, kurtosis, and when median is superior to arithmetic mean."
+            }
+          ]
+        },
+        {
+          "skill_id": "inferential_statistics",
+          "title": "Hypothesis Testing & A/B Experimentation",
+          "required_score": 70,
+          "sub_skills": [
+            {
+              "sub_skill_id": "hypothesis_testing",
+              "title": "T-Tests, P-Values & Confidence Intervals",
+              "blooms_level": "Analyze",
+              "learning_objective": "Analyze conversion experiments using two-sample t-tests and 95% confidence intervals."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "competency_id": "comp_bi_viz",
+      "title": "Data Visualization & Business Intelligence",
+      "required_score": 75,
+      "weight": 0.20,
+      "skills": [
+        {
+          "skill_id": "excel_analytics",
+          "title": "Advanced Spreadsheet Modeling",
+          "required_score": 75,
+          "sub_skills": [
+            {
+              "sub_skill_id": "excel_pivot_xlookup",
+              "title": "Pivot Tables & XLOOKUP",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply dynamic XLOOKUPs, multi-field pivot tables, and nested conditionals to validate ledger balances."
+            }
+          ]
+        },
+        {
+          "skill_id": "power_bi_tableau",
+          "title": "Power BI & Interactive Dashboards",
+          "required_score": 75,
+          "sub_skills": [
+            {
+              "sub_skill_id": "powerbi_data_modeling",
+              "title": "Star Schema & Relational Modeling",
+              "blooms_level": "Create",
+              "learning_objective": "Create a robust star schema data model connecting fact tables with conformable dimension tables."
+            },
+            {
+              "sub_skill_id": "dax_measures",
+              "title": "DAX Formulas & KPI Measures",
+              "blooms_level": "Apply",
+              "learning_objective": "Apply CALCULATE, FILTER, and time-intelligence DAX measures to compute year-to-date sales figures."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "competency_id": "comp_business_acumen",
+      "title": "Business Problem Solving & Storytelling",
+      "required_score": 70,
+      "weight": 0.10,
+      "skills": [
+        {
+          "skill_id": "business_analytics",
+          "title": "Metric Definition & Executive Presentation",
+          "required_score": 70,
+          "sub_skills": [
+            {
+              "sub_skill_id": "kpi_design_storytelling",
+              "title": "KPI Trees & Stakeholder Synthesis",
+              "blooms_level": "Evaluate",
+              "learning_objective": "Evaluate complex exploratory analysis into concise, executive-facing recommendation briefs."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

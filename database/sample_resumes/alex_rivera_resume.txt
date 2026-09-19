@@ -1,0 +1,35 @@
+Alex Rivera
+alex.rivera@example.com | +1 (555) 234-5678 | San Francisco, CA
+LinkedIn: linkedin.com/in/alexrivera-demo | GitHub: github.com/alexrivera-demo
+
+PROFESSIONAL SUMMARY
+Results-oriented Marketing & Operations Associate with 3+ years of experience analyzing customer behavior, inventory movements, and commercial transactions. Demonstrated capability with Microsoft Excel pivot tables, introductory SQL database queries, and reporting workflows. Passionate about transitioning into a full-time Data Analyst role to deliver evidence-backed business intelligence and predictive insights.
+
+TECHNICAL & ANALYTICAL SKILLS
+• Analytics & Reporting: Microsoft Excel (Pivot Tables, XLOOKUP, Nested IF, Conditional Formatting), Introductory SQL, Power BI (Basic Dashboards)
+• Programming & Data: Python (Basic Syntax, Lists, Dictionaries), Pandas (Introductory DataFrames, Data Cleaning)
+• Statistical Concepts: Descriptive Statistics, Mean/Median Dispersion, A/B Testing Fundamentals
+• Business Acumen: KPI Design, Stakeholder Communication, Executive Reporting, Process Optimization
+
+PROFESSIONAL EXPERIENCE
+
+Nexus Retail Solutions — San Francisco, CA
+Marketing & Operations Associate | Jan 2024 – Present
+• Spearheaded weekly e-commerce sales performance reconciliation across 50,000+ transaction lines using advanced Excel spreadsheet modeling.
+• Queried internal MySQL databases to extract customer cohort purchase histories, reducing weekly ad-hoc reporting turnaround by 35%.
+• Collaborated with product and category managers to identify seasonal inventory surplus and recommend discount tiers based on historical demand.
+• Built introductory Power BI dashboards visualizing regional sales performance and customer acquisition channels.
+
+Elevate Logistics — Oakland, CA
+Operations Assistant | Jun 2022 – Dec 2023
+• Monitored daily logistics dispatch records and performed data cleaning to resolve address missingness and postal discrepancies.
+• Automated spreadsheet logging for fleet maintenance schedules, reducing equipment downtime by 12%.
+• Compiled weekly KPI summaries for senior dispatch directors covering on-time delivery rates and delivery carrier variances.
+
+EDUCATION
+Bachelor of Science in Business Administration & Quantitative Analytics
+State University of California — Graduated May 2022
+
+CERTIFICATIONS & PROJECTS
+• Google Data Analytics Professional Certificate (In Progress)
+• Project: Retail Transaction & Revenue Reconciler (Excel model analyzing $4.2M gross product sales across 12 product categories)

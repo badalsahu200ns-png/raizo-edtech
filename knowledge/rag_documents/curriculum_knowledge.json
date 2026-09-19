@@ -1,0 +1,65 @@
+[
+  {
+    "doc_id": "rag_sql_window_01",
+    "topic": "SQL Window Functions",
+    "title": "Anatomy of a Window Function in SQL",
+    "source_name": "PostgreSQL Documentation: Window Functions",
+    "source_url": "https://www.postgresql.org/docs/current/tutorial-window.html",
+    "keywords": ["window function", "over", "partition by", "order by", "row_number", "rank", "dense_rank"],
+    "content": "A window function performs a calculation across a set of table rows that are somehow related to the current row. Unlike regular aggregate functions, window functions do not cause rows to become grouped into a single output row — the rows retain their separate identities. The OVER clause determines exactly how the rows are divided and ordered for processing. PARTITION BY divides the rows into groups, or partitions, that share the same values of the partition expression. For example, `ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY salary DESC)` assigns a 1-indexed sequential integer to each employee within their respective department without collapsing the rows."
+  },
+  {
+    "doc_id": "rag_sql_window_02",
+    "topic": "SQL Window Functions",
+    "title": "Difference Between RANK, DENSE_RANK, and ROW_NUMBER",
+    "source_name": "PostgreSQL Documentation: General-Purpose Window Functions",
+    "source_url": "https://www.postgresql.org/docs/current/functions-window.html",
+    "keywords": ["rank", "dense_rank", "row_number", "ties", "window ranking"],
+    "content": "ROW_NUMBER() produces unique, strictly sequential numbers for every row (e.g. 1, 2, 3, 4). When identical values occur in the ORDER BY columns, ROW_NUMBER() arbitrates ties non-deterministically unless additional tie-breaker columns are specified. RANK() assigns the same ranking to tie values, but skips subsequent rank numbers (e.g. 1, 2, 2, 4). DENSE_RANK() also assigns identical ranks to tied rows, but does not skip any ranks (e.g. 1, 2, 2, 3). In business analytics, DENSE_RANK is preferred when computing top compensation brackets where ties should not cause gaps in tiered rewards."
+  },
+  {
+    "doc_id": "rag_sql_joins_01",
+    "topic": "SQL Relational JOINs",
+    "title": "Relational Join Semantics and Handling Nulls",
+    "source_name": "PostgreSQL Tutorial: Joining Tables",
+    "source_url": "https://www.postgresql.org/docs/current/tutorial-join.html",
+    "keywords": ["inner join", "left join", "cardinality", "fan-out", "null", "foreign key"],
+    "content": "An INNER JOIN evaluates the join predicate and retains only records that have matching keys in both left and right tables. A LEFT OUTER JOIN preserves every row from the left table regardless of whether a matching right-table record exists; non-matching columns from the right table are populated with SQL NULL. Care must be taken when placing filter predicates in the WHERE clause versus the ON clause: placing a right-table filter in the WHERE clause inadvertently converts a LEFT JOIN into an INNER JOIN if the filter rejects NULL values. Furthermore, joins on non-unique keys cause Cartesian multiplication (fan-out), which artificially inflates aggregate sums."
+  },
+  {
+    "doc_id": "rag_pandas_missing_01",
+    "topic": "Pandas Missing Values",
+    "title": "Best Practices for Missing Value Detection and Imputation in Pandas",
+    "source_name": "Pandas User Guide: Working with Missing Data",
+    "source_url": "https://pandas.pydata.org/docs/user_guide/missing_data.html",
+    "keywords": ["missing values", "fillna", "dropna", "isna", "imputation", "median", "forward fill"],
+    "content": "In Pandas, missing data is represented by NaN (Not a Number) or None, detected via `df.isna()` or `df.isnull()`. Handling missingness requires analyzing whether data is Missing Completely at Random (MCAR) or Missing at Random (MAR). Calling `df.dropna()` without inspection can discard vital minority classes. For time-series sensor data, forward filling via `df.ffill()` propagates the last valid observation forward. For skewed numerical features (like revenue or transaction amount), imputing with the column median (`df['amount'].fillna(df['amount'].median())`) is robust to outliers, unlike the arithmetic mean which is pulled by extreme values."
+  },
+  {
+    "doc_id": "rag_pandas_indexing_01",
+    "topic": "Pandas DataFrames",
+    "title": "Label-Based (.loc) vs Positional (.iloc) Indexing",
+    "source_name": "Pandas User Guide: Indexing and Selecting Data",
+    "source_url": "https://pandas.pydata.org/docs/user_guide/indexing.html",
+    "keywords": ["loc", "iloc", "boolean indexing", "slicing", "dataframe selection"],
+    "content": "Pandas provides explicit accessor properties for indexing: `.loc[]` is strictly label-based, while `.iloc[]` is integer-position based (0 through length-1). When slicing with `.loc['a':'c']`, the endpoint is inclusive. In contrast, `.iloc[0:5]` follows standard Python half-open intervals where the stop index 5 is excluded. For conditional subsetting, boolean series can be passed directly to `.loc`: `df.loc[df['sales'] > 1000, ['customer_id', 'revenue']]` efficiently selects specific columns for matched records in a single vectorized step without incurring chained assignment warnings."
+  },
+  {
+    "doc_id": "rag_stats_eda_01",
+    "topic": "Applied Statistics",
+    "title": "Measures of Dispersion and Identifying Outliers",
+    "source_name": "SciPy Statistical Functions Guide",
+    "source_url": "https://docs.scipy.org/doc/scipy/reference/stats.html",
+    "keywords": ["statistics", "iqr", "median", "mean", "outlier", "skewness", "interquartile"],
+    "content": "The mean and standard deviation are sensitive to extreme values and should not be used alone on right-skewed business data such as e-commerce basket sizes. The Interquartile Range (IQR = Q3 - Q1) captures the middle 50% of data. The Tukey fence defines outliers as points falling below `Q1 - 1.5 * IQR` or above `Q3 + 1.5 * IQR`. When evaluating customer lifetime value, reporting median and IQR gives a true reflection of typical customer behavior, preventing single whale transactions from distorting operational forecasts."
+  },
+  {
+    "doc_id": "rag_powerbi_modeling_01",
+    "topic": "Business Intelligence",
+    "title": "Star Schema Principles for Power BI and Analytics Dashboards",
+    "source_name": "Microsoft Power BI Architecture Guidance",
+    "source_url": "https://learn.microsoft.com/en-us/power-bi/guidance/star-schema",
+    "keywords": ["star schema", "fact table", "dimension table", "power bi", "dax", "cardinality"],
+    "content": "A Star Schema organizes data into central Fact tables surrounded by Dimension tables. Fact tables hold measurable numeric metrics (e.g. Sales Amount, Quantity, Discount) and foreign keys. Dimension tables hold contextual business attributes (e.g. Customer Name, Product Category, Calendar Date). In Power BI, relationships should be 1-to-Many from Dimensions to Facts with Single cross-filter direction. Bi-directional cross-filtering introduces ambiguity and degrades query performance. DAX measures should always be defined with explicit table scoping and aggregation functions."
+  }
+]

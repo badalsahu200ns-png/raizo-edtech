@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+
+# Production builds
+.next/
+out/
+build/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Databases & local state
+*.sqlite3
+# Keep raizo_learning.db tracked if desired or seed script can rebuild it. 
+# Keep SQLite database seeded for immediate out-of-the-box demo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,74 @@
+[
+  {
+    "role_id": "data_analyst",
+    "title": "Data Analyst",
+    "category": "Data & Analytics",
+    "description": "Transforms raw business and transactional data into actionable operational insights, automated reports, and strategic intelligence.",
+    "is_active_demo": true,
+    "core_skills": ["SQL", "Python", "Pandas", "Statistics", "Data Cleaning", "Power BI", "Excel", "Data Visualization"]
+  },
+  {
+    "role_id": "business_analyst",
+    "title": "Business Analyst",
+    "category": "Business & Strategy",
+    "description": "Bridges the gap between IT and business stakeholders using data analysis, requirements elicitation, and process modeling.",
+    "is_active_demo": false,
+    "core_skills": ["SQL", "Requirements Gathering", "Process Modeling (BPMN)", "Excel", "Tableau", "Agile User Stories"]
+  },
+  {
+    "role_id": "product_analyst",
+    "title": "Product Analyst",
+    "category": "Product",
+    "description": "Analyzes user journeys, conversion funnels, retention metrics, and A/B experiments to guide product roadmaps.",
+    "is_active_demo": false,
+    "core_skills": ["SQL", "A/B Testing", "Funnel Analysis", "Mixpanel/Amplitude", "Python", "Cohort Analysis"]
+  },
+  {
+    "role_id": "software_developer",
+    "title": "Software Developer",
+    "category": "Engineering",
+    "description": "Designs, develops, tests, and maintains modern web and distributed backend software applications.",
+    "is_active_demo": false,
+    "core_skills": ["TypeScript/JavaScript", "Python", "REST APIs", "Data Structures & Algorithms", "SQL", "Git", "CI/CD"]
+  },
+  {
+    "role_id": "data_scientist",
+    "title": "Data Scientist",
+    "category": "Data & Analytics",
+    "description": "Builds statistical models, machine learning algorithms, and predictive systems to solve complex business challenges.",
+    "is_active_demo": false,
+    "core_skills": ["Python", "Machine Learning", "Scikit-Learn", "Advanced Statistics", "SQL", "Deep Learning", "Feature Engineering"]
+  },
+  {
+    "role_id": "ai_ml_engineer",
+    "title": "AI/ML Engineer",
+    "category": "Artificial Intelligence",
+    "description": "Deploys, monitors, and optimizes scalable machine learning pipelines, LLM architectures, and inference microservices.",
+    "is_active_demo": false,
+    "core_skills": ["Python", "PyTorch/TensorFlow", "MLOps", "Model Deployment (Docker/K8s)", "Vector DBs", "API Design"]
+  },
+  {
+    "role_id": "cloud_engineer",
+    "title": "Cloud Engineer",
+    "category": "Infrastructure",
+    "description": "Architects, provisions, and secures scalable cloud infrastructure and CI/CD automation across GCP, AWS, or Azure.",
+    "is_active_demo": false,
+    "core_skills": ["Linux", "Terraform / IaC", "Docker & Kubernetes", "Cloud Security", "Networking", "GCP / AWS"]
+  },
+  {
+    "role_id": "gen_ai_specialist",
+    "title": "Generative AI Specialist",
+    "category": "Artificial Intelligence",
+    "description": "Designs multi-agent systems, RAG architectures, prompt pipelines, and fine-tunes LLMs for enterprise automation.",
+    "is_active_demo": false,
+    "core_skills": ["LLM Orchestration", "LangChain/LangGraph", "RAG & Vector Search", "Prompt Engineering", "Fine-Tuning", "Python"]
+  },
+  {
+    "role_id": "cybersecurity_analyst",
+    "title": "Cybersecurity Analyst",
+    "category": "Security",
+    "description": "Protects organizational data and networks through vulnerability management, threat hunting, and incident response.",
+    "is_active_demo": false,
+    "core_skills": ["Network Security", "SIEM & SOC Operations", "Vulnerability Assessment", "Incident Response", "Identity Access Management"]
+  }
+]
