@@ -61,7 +61,7 @@ const SECONDARY_NAV: NavItem[] = [
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [activityDrawerOpen, setActivityDrawerOpen] = useState(false);
@@ -70,12 +70,50 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   // If on landing page "/", don't show full internal app sidebar, but keep clean top/footer
   const isLanding = pathname === "/";
 
+  // Check if current route is public
+  const isPublicRoute = (path: string) => {
+    return (
+      path === "/" ||
+      path === "/login" ||
+      path === "/signup" ||
+      path === "/privacy" ||
+      path === "/terms" ||
+      path.startsWith("/verify") ||
+      path.startsWith("/certificate/verify")
+    );
+  };
+
+  // Route protection guard: redirect unauthenticated users accessing protected pages
+  React.useEffect(() => {
+    if (!isPublicRoute(pathname) && !isLoading && !isAuthenticated) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [pathname, isLoading, isAuthenticated, router]);
+
   const getInitials = (name?: string) => {
-    if (!name) return "AR";
+    if (!name) return "RZ";
     const parts = name.trim().split(" ");
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return name.slice(0, 2).toUpperCase();
   };
+
+  const displayName = user?.display_name || user?.name || "RAIZO Learner";
+  const userPhoto = user?.photo_url || user?.picture;
+
+  // Zero-flicker loading state for protected routes while resolving authentication
+  if (!isPublicRoute(pathname) && (isLoading || !isAuthenticated)) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0B0F14] text-[#F5F7FA]">
+        <div className="flex flex-col items-center gap-4">
+          <RaizoLogo size={42} />
+          <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#11161D] border border-[#222A36] text-xs text-[#38BDF8]">
+            <span className="h-2 w-2 rounded-full bg-[#0EA5E9] animate-ping" />
+            <span>Verifying Google Authentication...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0F14] text-[#F5F7FA]">
@@ -99,7 +137,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {/* Center Context / Pathway Tag */}
           <div className="hidden md:flex items-center space-x-3 text-xs">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#151B23] text-[#F5F7FA] font-medium border border-[#27303B]">
-              <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+              <span className="h-2 w-2 rounded-full bg-[#0EA5E9]" />
               Data Analyst Track
             </span>
             <span className="text-[#7E8996]">•</span>
@@ -113,36 +151,45 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Agent Activity Trigger */}
             <button
               onClick={() => setActivityDrawerOpen(true)}
-              className="inline-flex items-center space-x-1.5 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] hover:border-[#5B8DEF]/40 transition-all"
+              className="inline-flex items-center space-x-1.5 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] hover:border-[#0EA5E9]/40 transition-all cursor-pointer"
               title="Inspect real-time agent audit logs"
             >
-              <Activity className="h-3.5 w-3.5 text-[#5B8DEF] animate-pulse" />
+              <Activity className="h-3.5 w-3.5 text-[#0EA5E9] animate-pulse" />
               <span className="hidden sm:inline">Agent Activity</span>
             </button>
 
             {/* Contact Button */}
             <button
               onClick={() => setContactModalOpen(true)}
-              className="inline-flex items-center space-x-1 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-semibold text-[#5B8DEF] hover:bg-[#5B8DEF]/10 hover:border-[#5B8DEF]/40 transition-all"
+              className="inline-flex items-center space-x-1 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-semibold text-[#0EA5E9] hover:bg-[#0EA5E9]/10 hover:border-[#0EA5E9]/40 transition-all cursor-pointer"
               title="Contact Badal Kumar Sahu"
             >
               <Mail className="h-3.5 w-3.5" />
               <span>Contact</span>
             </button>
 
-            {/* Authenticated User Menu or Sign In / Sign Up Buttons */}
+            {/* Authenticated User Menu or Sign In Button */}
             {isAuthenticated && user ? (
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center space-x-2 rounded-lg border border-[#27303B] bg-[#151B23] px-2.5 py-1.5 hover:border-[#5B8DEF]/50 transition-all group cursor-pointer"
+                  className="flex items-center space-x-2 rounded-lg border border-[#27303B] bg-[#151B23] px-2.5 py-1.5 hover:border-[#0EA5E9]/50 transition-all group cursor-pointer"
                   title="Learner Account Menu"
                 >
-                  <div className="h-6 w-6 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-[10px] font-bold">
-                    {getInitials(user?.name)}
-                  </div>
-                  <span className="text-xs font-semibold text-[#F5F7FA] hidden lg:inline group-hover:text-[#5B8DEF] transition-colors">
-                    {user?.name || "Alex Rivera"}
+                  {userPhoto ? (
+                    <img
+                      src={userPhoto}
+                      alt={displayName}
+                      className="h-6 w-6 rounded-full object-cover border border-[#27303B]"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="h-6 w-6 rounded-full bg-[#0EA5E9] text-white flex items-center justify-center text-[10px] font-bold">
+                      {getInitials(displayName)}
+                    </div>
+                  )}
+                  <span className="text-xs font-semibold text-[#F5F7FA] hidden lg:inline group-hover:text-[#38BDF8] transition-colors">
+                    {displayName}
                   </span>
                   <ChevronDown className="h-3 w-3 text-[#7E8996] group-hover:text-[#F5F7FA]" />
                 </button>
@@ -155,9 +202,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     />
                     <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#27303B] bg-[#151B23] p-2 shadow-2xl z-50 animate-in fade-in">
                       <div className="px-3 py-2 border-b border-[#27303B] mb-1">
-                        <p className="text-xs font-bold text-[#F5F7FA] truncate">{user?.name}</p>
-                        <p className="text-[11px] text-[#B4BDC8] truncate">{user?.email}</p>
-                        <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-wider text-[#36C98F] bg-[#36C98F]/10 border border-[#36C98F]/20 px-1.5 py-0.5 rounded">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          {userPhoto ? (
+                            <img
+                              src={userPhoto}
+                              alt={displayName}
+                              className="h-8 w-8 rounded-full object-cover border border-[#27303B]"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded-full bg-[#0EA5E9] text-white flex items-center justify-center text-xs font-bold">
+                              {getInitials(displayName)}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-[#F5F7FA] truncate">{displayName}</p>
+                            <p className="text-[10px] text-[#A7B0BC] truncate font-mono">{user?.email}</p>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 px-1.5 py-0.5 rounded">
                           ✓ Google Verified
                         </span>
                       </div>
@@ -177,10 +240,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           await logout();
                           router.push("/login");
                         }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#E86A6A] hover:bg-[#E86A6A]/10 rounded-lg transition-colors text-left mt-1 border-t border-[#27303B] pt-2 cursor-pointer"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg transition-colors text-left mt-1 border-t border-[#27303B] pt-2 cursor-pointer"
                       >
                         <LogOut className="h-3.5 w-3.5" />
-                        <span>Sign Out</span>
+                        <span>Log out</span>
                       </button>
                     </div>
                   </>
@@ -190,17 +253,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center space-x-2">
                 <Link
                   href="/login"
-                  className="inline-flex items-center space-x-1.5 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-semibold text-[#F5F7FA] hover:bg-[#1A212B] transition-colors"
+                  className="inline-flex items-center space-x-1.5 rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] text-white px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs"
                 >
-                  <User className="h-3.5 w-3.5 text-[#7E8996]" />
-                  <span>Sign In</span>
-                </Link>
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center space-x-1.5 rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] active:bg-[#4779D8] text-white px-3 py-1.5 text-xs font-bold transition-colors shadow-xs"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Sign Up</span>
+                  <User className="h-3.5 w-3.5" />
+                  <span>Continue with Google</span>
                 </Link>
               </div>
             )}
@@ -401,12 +457,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {isAuthenticated && user ? (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-3 px-1">
-                    <div className="h-8 w-8 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-xs font-bold shrink-0">
-                      {getInitials(user?.name)}
-                    </div>
+                    {userPhoto ? (
+                      <img
+                        src={userPhoto}
+                        alt={displayName}
+                        className="h-8 w-8 rounded-full object-cover border border-[#27303B]"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-[#0EA5E9] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                        {getInitials(displayName)}
+                      </div>
+                    )}
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-[#F5F7FA] truncate">{user?.name}</p>
-                      <p className="text-[10px] text-[#B4BDC8] truncate">{user?.email}</p>
+                      <p className="text-xs font-bold text-[#F5F7FA] truncate">{displayName}</p>
+                      <p className="text-[10px] text-[#A7B0BC] truncate font-mono">{user?.email}</p>
                     </div>
                   </div>
 
@@ -425,10 +490,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       await logout();
                       router.push("/login");
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#E86A6A]/10 border border-[#E86A6A]/30 text-xs font-bold text-[#E86A6A] hover:bg-[#E86A6A]/20 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/30 text-xs font-bold text-[#EF4444] hover:bg-[#EF4444]/20 transition-colors cursor-pointer"
                   >
                     <LogOut className="h-3.5 w-3.5" />
-                    <span>Sign Out</span>
+                    <span>Log out</span>
                   </button>
                 </div>
               ) : (
@@ -436,18 +501,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <Link
                     href="/login"
                     onClick={() => setMobileDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-[#27303B] bg-[#151B23] text-xs font-semibold text-[#F5F7FA] hover:bg-[#1A212B]"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] text-white text-xs font-bold transition-all shadow-xs"
                   >
-                    <User className="h-3.5 w-3.5 text-[#7E8996]" />
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] text-white text-xs font-bold shadow-sm"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Sign Up with Google</span>
+                    <User className="h-3.5 w-3.5" />
+                    <span>Continue with Google</span>
                   </Link>
                 </div>
               )}

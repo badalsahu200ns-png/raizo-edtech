@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,13 @@ export default function OnboardingPage() {
   const [isReviewing, setIsReviewing] = useState<boolean>(false);
 
   // Step 1 State: Basic Profile
-  const [name, setName] = useState("Alex Rivera");
+  const [name, setName] = useState(user?.display_name || user?.name || "Learner");
+
+  React.useEffect(() => {
+    if (user?.display_name || user?.name) {
+      setName(user.display_name || user.name);
+    }
+  }, [user]);
   const [currentRole, setCurrentRole] = useState("Marketing & Operations Associate");
   const [yearsExperience, setYearsExperience] = useState(3.0);
   const [education, setEducation] = useState("B.S. in Business & Quantitative Analytics");

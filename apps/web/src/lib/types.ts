@@ -1,9 +1,17 @@
 export interface UserProfile {
   id: string;
   name: string;
+  display_name?: string;
+  first_name?: string;
+  last_name?: string;
   email: string;
   picture?: string;
+  photo_url?: string;
+  auth_provider?: string;
+  provider_user_id?: string;
+  email_verified?: boolean;
   is_google_verified?: boolean;
+  onboarding_completed?: boolean;
   google_id?: string;
   current_role: string;
   target_role: string;
@@ -12,6 +20,7 @@ export interface UserProfile {
   weekly_hours: number;
   created_at?: string;
   updated_at?: string;
+  last_login_at?: string;
 }
 
 export interface GoogleAuthResponse {
@@ -19,12 +28,21 @@ export interface GoogleAuthResponse {
   token: string;
   expires_at?: string;
   is_new_user?: boolean;
+  onboarding_completed?: boolean;
   user: {
     id: string;
     email: string;
     name: string;
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
     picture?: string;
+    photo_url?: string;
+    auth_provider?: string;
+    provider_user_id?: string;
+    email_verified?: boolean;
     is_google_verified: boolean;
+    onboarding_completed?: boolean;
     current_role?: string;
     target_role?: string;
   };

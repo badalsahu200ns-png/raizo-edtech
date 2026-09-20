@@ -106,31 +106,40 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
             <div className="flex items-center space-x-2">
               <Link
                 href="/profile"
-                className="flex items-center space-x-2.5 rounded-xl border border-[#27303B] bg-[#151B23] px-3 py-1.5 hover:border-[#5B8DEF]/50 transition-all group"
+                className="flex items-center space-x-2.5 rounded-xl border border-[#27303B] bg-[#151B23] px-3 py-1.5 hover:border-[#0EA5E9]/50 transition-all group"
                 title="Learner Profile & Settings"
               >
-                <div className="h-7 w-7 rounded-full bg-[#5B8DEF] flex items-center justify-center text-[11px] font-bold text-white shadow-xs">
-                  {getInitials(user?.name)}
-                </div>
+                {user.photo_url || user.picture ? (
+                  <img
+                    src={user.photo_url || user.picture}
+                    alt={user.display_name || user.name || "User"}
+                    className="h-7 w-7 rounded-full object-cover border border-[#27303B]"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-[#0EA5E9] flex items-center justify-center text-[11px] font-bold text-white shadow-xs">
+                    {getInitials(user.display_name || user.name)}
+                  </div>
+                )}
 
                 <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#5B8DEF] transition-colors">
-                    {user?.name || "Alex Rivera"}
+                  <span className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#38BDF8] transition-colors">
+                    {user.display_name || user.name || "RAIZO Learner"}
                   </span>
-                  <span className="text-[10px] text-[#5B8DEF] font-medium">
+                  <span className="text-[10px] text-[#0EA5E9] font-medium">
                     {user?.target_role === "data_analyst" ? "Data Analyst Track" : "Analytics Pathway"}
                   </span>
                 </div>
               </Link>
 
-              {/* Sign Out Button */}
+              {/* Log Out Button */}
               <button
                 onClick={async () => {
                   await logout();
                   router.push("/login");
                 }}
-                className="rounded-lg p-2 text-[#7E8996] hover:text-[#E86A6A] hover:bg-[#E86A6A]/10 transition-colors cursor-pointer"
-                title="Sign Out"
+                className="rounded-lg p-2 text-[#A7B0BC] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
+                title="Log out"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -139,15 +148,9 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
             <div className="flex items-center space-x-2">
               <Link
                 href="/login"
-                className="rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] transition-colors"
+                className="rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-xs"
               >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] active:bg-[#4779D8] px-3 py-1.5 text-xs font-bold text-white transition-colors"
-              >
-                Sign Up
+                Continue with Google
               </Link>
             </div>
           )}

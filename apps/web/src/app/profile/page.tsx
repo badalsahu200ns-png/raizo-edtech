@@ -124,11 +124,22 @@ export default function ProfilePage() {
       <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-8 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
-            <div className="h-16 w-16 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-xl font-bold">
-              {name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-            </div>
+            {(authUser?.photo_url || authUser?.picture || user?.photo_url) ? (
+              <img
+                src={authUser?.photo_url || authUser?.picture || user?.photo_url}
+                alt={name}
+                referrerPolicy="no-referrer"
+                className="h-16 w-16 rounded-full object-cover border-2 border-[#0EA5E9] shadow-md"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-xl font-bold shadow-md">
+                {name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <div className="space-y-0.5">
-              <h2 className="text-2xl font-extrabold text-[#F5F7FA]">{name}</h2>
+              <h2 className="text-2xl font-extrabold text-[#F5F7FA]">
+                {authUser?.display_name || name}
+              </h2>
               <span className="text-xs font-semibold text-[#5B8DEF] block">
                 Target Pathway: Data Analyst
               </span>
