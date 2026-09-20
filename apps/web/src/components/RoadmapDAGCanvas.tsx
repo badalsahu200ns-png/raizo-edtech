@@ -8,11 +8,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
-  ArrowRight,
-  Sparkles,
-  BookOpen,
-  FileCheck2,
-  Info
+  FileCheck2
 } from "lucide-react";
 import { RoadmapNode } from "@/lib/types";
 
@@ -41,7 +37,7 @@ export default function RoadmapDAGCanvas({
     if (node.is_remediation) {
       return {
         label: "Remediation Inserted",
-        color: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+        color: "bg-[#E86A6A]/10 text-[#E86A6A] border-[#E86A6A]/30",
         icon: AlertTriangle
       };
     }
@@ -50,26 +46,26 @@ export default function RoadmapDAGCanvas({
       case "completed":
         return {
           label: "Milestone Verified",
-          color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+          color: "bg-[#36C98F]/10 text-[#36C98F] border-[#36C98F]/30",
           icon: CheckCircle2
         };
       case "in_progress":
       case "available":
         return {
           label: "Unlocked & Ready",
-          color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+          color: "bg-[#5B8DEF]/10 text-[#5B8DEF] border-[#5B8DEF]/30",
           icon: Unlock
         };
       case "needs_remediation":
         return {
           label: "Needs Remediation",
-          color: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+          color: "bg-[#F2B84B]/10 text-[#F2B84B] border-[#F2B84B]/30",
           icon: AlertTriangle
         };
       default:
         return {
           label: "Prerequisites Locked",
-          color: "bg-slate-700/30 text-slate-400 border-slate-700/50",
+          color: "bg-[#1A212B] text-[#7E8996] border-[#27303B]",
           icon: Lock
         };
     }
@@ -78,17 +74,17 @@ export default function RoadmapDAGCanvas({
   return (
     <div className="w-full space-y-4">
       {/* Top Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#27303B] pb-3">
         <div className="flex items-center space-x-2 text-xs">
-          <span className="text-slate-400 font-medium">Filter Nodes:</span>
+          <span className="text-[#B4BDC8] font-medium">Filter Nodes:</span>
           {["all", "available", "remediation", "passed", "locked"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all ${
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all cursor-pointer ${
                 filter === f
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                  : "bg-white/5 text-slate-400 hover:text-slate-200 hover:bg-white/10"
+                  ? "bg-[#5B8DEF] text-white shadow-sm"
+                  : "bg-[#151B23] border border-[#27303B] text-[#B4BDC8] hover:text-[#F5F7FA]"
               }`}
             >
               {f}
@@ -96,23 +92,23 @@ export default function RoadmapDAGCanvas({
           ))}
         </div>
 
-        <div className="flex items-center space-x-3 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" /> Passed
+        <div className="flex items-center space-x-3 text-xs text-[#B4BDC8]">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#36C98F]" /> Verified
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-cyan-400" /> Available
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" /> Ready
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400 animate-ping" /> Remediation
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#E86A6A]" /> Remediation
           </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-600" /> Locked
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#27303B]" /> Locked
           </span>
         </div>
       </div>
 
-      {/* DAG Interactive Grid / Visual Pipeline */}
+      {/* DAG Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredNodes.map((node) => {
           const badge = getStatusBadge(node);
@@ -124,56 +120,52 @@ export default function RoadmapDAGCanvas({
             <div
               key={node.id}
               onClick={() => onSelectNode && onSelectNode(node)}
-              className={`group relative rounded-2xl border p-5 transition-all cursor-pointer flex flex-col justify-between ${
+              className={`group relative rounded-xl border p-5 transition-all cursor-pointer flex flex-col justify-between shadow-sm ${
                 isRemediation
-                  ? "border-rose-500/60 bg-gradient-to-br from-rose-950/40 via-[#101424] to-[#0d1220] shadow-lg shadow-rose-950/40"
+                  ? "border-[#E86A6A]/40 bg-[#151B23]"
                   : isSelected
-                  ? "border-indigo-500 bg-indigo-950/30 shadow-xl shadow-indigo-950/50 scale-[1.02]"
+                  ? "border-[#5B8DEF] bg-[#1A212B] ring-1 ring-[#5B8DEF]"
                   : node.status === "passed"
-                  ? "border-emerald-500/30 bg-[#0d1624] hover:border-emerald-500/50"
+                  ? "border-[#36C98F]/30 bg-[#151B23] hover:border-[#36C98F]"
                   : node.status === "available"
-                  ? "border-cyan-500/40 bg-[#0e1728] hover:border-cyan-400/70"
-                  : "border-white/5 bg-[#090d16]/80 opacity-70 hover:opacity-100 hover:border-white/15"
+                  ? "border-[#5B8DEF]/30 bg-[#151B23] hover:border-[#5B8DEF]"
+                  : "border-[#27303B] bg-[#11161D] opacity-75 hover:opacity-100"
               }`}
             >
-              {/* Category & Status */}
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-semibold text-indigo-400 uppercase tracking-wider truncate">
+                  <span className="text-[10px] font-bold text-[#5B8DEF] uppercase tracking-wider truncate">
                     {node.category}
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badge.color}`}
+                    className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold ${badge.color}`}
                   >
                     <BadgeIcon className="h-3 w-3" />
                     {badge.label}
                   </span>
                 </div>
 
-                {/* Node Title */}
-                <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                <h4 className="text-sm font-bold text-[#F5F7FA] group-hover:text-[#5B8DEF] transition-colors leading-snug">
                   {node.title}
                 </h4>
 
-                {/* Learning Objective (Bloom's Taxonomy) */}
-                <div className="mt-2.5 rounded-lg bg-black/30 p-2.5 border border-white/5 text-xs text-slate-300">
-                  <span className="text-[10px] uppercase font-bold text-indigo-300 block mb-0.5">
-                    Objective (Bloom's Taxonomy):
+                <div className="mt-2.5 rounded-lg bg-[#11161D] p-2.5 border border-[#27303B] text-xs text-[#B4BDC8]">
+                  <span className="text-[10px] uppercase font-bold text-[#F5F7FA] block mb-0.5">
+                    Objective:
                   </span>
                   <p className="leading-relaxed line-clamp-2">{node.learning_objective}</p>
                 </div>
               </div>
 
-              {/* Node Footer Info */}
-              <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+              <div className="mt-4 pt-3 border-t border-[#27303B] flex items-center justify-between text-xs text-[#7E8996]">
                 <div className="flex items-center space-x-2">
                   <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 text-slate-500" />
+                    <Clock className="h-3 w-3 text-[#7E8996]" />
                     {node.estimated_duration_minutes}m
                   </span>
                   {node.score !== null && node.score !== undefined && (
-                    <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-bold text-indigo-300">
-                      Score: {node.score}%
+                    <span className="font-mono font-bold text-[#5B8DEF]">
+                      {node.score}%
                     </span>
                   )}
                 </div>
@@ -182,18 +174,18 @@ export default function RoadmapDAGCanvas({
                   {node.status === "available" || node.status === "needs_remediation" ? (
                     <Link
                       href={`/assessment?skill=${node.skill_id}&node=${node.id}&title=${encodeURIComponent(node.title)}`}
-                      className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 to-cyan-600 px-2.5 py-1 text-[11px] font-bold text-white shadow hover:from-indigo-500 hover:to-cyan-500"
+                      className="flex items-center gap-1 rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] px-2.5 py-1 text-[11px] font-bold text-white transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <FileCheck2 className="h-3.5 w-3.5" />
+                      <FileCheck2 className="h-3 w-3" />
                       Take Checkpoint
                     </Link>
                   ) : node.status === "passed" ? (
-                    <span className="flex items-center gap-1 text-emerald-400 text-[11px] font-semibold">
+                    <span className="flex items-center gap-1 text-[#36C98F] text-[11px] font-semibold">
                       <CheckCircle2 className="h-3.5 w-3.5" /> Passed
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-slate-500 text-[11px]">
+                    <span className="flex items-center gap-1 text-[#7E8996] text-[11px]">
                       <Lock className="h-3 w-3" /> Locked
                     </span>
                   )}

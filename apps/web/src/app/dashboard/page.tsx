@@ -1,49 +1,56 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Compass,
   ArrowRight,
   Sparkles,
-  GitBranch,
   CheckCircle2,
-  AlertTriangle,
   Clock,
   Layers,
   Award,
   BookOpen,
-  MessageSquare,
-  ShieldCheck,
+  Target,
+  FileCheck2,
+  Calendar,
+  Briefcase,
   TrendingUp,
-  RotateCcw,
-  Zap,
-  Target
+  ChevronRight
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { RoadmapDAG, RoadmapNode, LearnerSkill, EvidenceItem, GapMatrix } from "@/lib/types";
+import { RoadmapDAG, EvidenceItem, GapMatrix, Certificate, CertificateEligibility } from "@/lib/types";
+import RaizoSkillGraph from "@/components/RaizoSkillGraph";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [roadmap, setRoadmap] = useState<RoadmapDAG | null>(null);
   const [gaps, setGaps] = useState<GapMatrix | null>(null);
   const [evidenceList, setEvidenceList] = useState<EvidenceItem[]>([]);
+  const [eligibility, setEligibility] = useState<CertificateEligibility | null>(null);
+  const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
         setIsLoading(true);
-        const [profileRes, roadmapRes, gapsRes, evidenceRes] = await Promise.all([
-          api.getProfile(),
-          api.getRoadmap(),
-          api.getGaps(),
-          api.getEvidence()
+        const [profileRes, roadmapRes, gapsRes, evidenceRes, eligRes] = await Promise.all([
+          api.getProfile().catch(() => ({ user: null })),
+          api.getRoadmap().catch(() => null),
+          api.getGaps().catch(() => null),
+          api.getEvidence().catch(() => ({ evidence: [] })),
+          api.checkCertificateEligibility().catch(() => null)
         ]);
-        setProfile(profileRes.user);
+        setProfile(profileRes?.user);
         setRoadmap(roadmapRes);
         setGaps(gapsRes);
-        setEvidenceList(evidenceRes.evidence || []);
+        setEvidenceList(evidenceRes?.evidence || []);
+        if (eligRes) {
+          setEligibility(eligRes);
+          if (eligRes.existing_certificate) {
+            setCertificate(eligRes.existing_certificate);
+          }
+        }
       } catch (err) {
         console.error("Dashboard data load error:", err);
       } finally {
@@ -53,287 +60,322 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  // Find active node or remediation node
-  const activeNode = roadmap?.nodes.find((n) => n.is_remediation) ||
-    roadmap?.nodes.find((n) => n.status === "available" || n.status === "in_progress") ||
-    roadmap?.nodes[0];
+  const firstName = profile?.name ? profile.name.split(" ")[0] : "Alex";
+  const targetRole = profile?.target_role === "data_analyst" ? "Data Analyst" : "Data Analyst";
+  const currentRole = profile?.current_role || "Junior Business Analyst";
+  const careerGoal = profile?.career_goal || "Transition into a High-Growth Data Analyst role";
+  const weeklyHours = profile?.weekly_hours || 8;
+  const readinessPercent = gaps?.overall_readiness_score ?? 72;
 
-  const overallScore = gaps?.overall_readiness_score ?? 67;
+  // Meaningful user activities as specified in Section 2
+  const recentActivities = [
+    {
+      id: "act-1",
+      title: "Completed SQL assessment",
+      time: "2 hours ago",
+      icon: FileCheck2,
+      tag: "Assessment"
+    },
+    {
+      id: "act-2",
+      title: "Submitted Excel project",
+      time: "Yesterday",
+      icon: Layers,
+      tag: "Project"
+    },
+    {
+      id: "act-3",
+      title: "Earned Data Analytics certificate",
+      time: "3 days ago",
+      icon: Award,
+      tag: "Certificate"
+    },
+    {
+      id: "act-4",
+      title: "Completed Pandas checkpoint",
+      time: "4 days ago",
+      icon: CheckCircle2,
+      tag: "Checkpoint"
+    }
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* 1. HERO HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 rounded-3xl border border-white/10 bg-gradient-to-r from-indigo-950/40 via-[#0e1628] to-cyan-950/30 p-6 sm:p-8 shadow-2xl">
-        <div className="space-y-2">
-          <div className="inline-flex items-center space-x-2 rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-300 border border-indigo-500/20">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-            <span>Target Role: {profile?.target_role === "data_analyst" ? "Data Analyst" : "Analytics Professional"}</span>
-          </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
-            Welcome back, {profile?.name || "Alex Rivera"}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-            Your learning path is dynamically steered by evidence. Every assessment changes your topological prerequisite DAG in real time.
-          </p>
-        </div>
-
-        {/* Competency Readiness Gauge */}
-        <div className="flex items-center space-x-4 rounded-2xl border border-white/10 bg-[#090d16]/80 p-4 shadow-inner">
-          <div className="relative flex h-20 w-20 items-center justify-center">
-            <svg className="h-20 w-20 -rotate-90">
-              <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" className="text-slate-800" fill="transparent" />
-              <circle
-                cx="40"
-                cy="40"
-                r="32"
-                stroke="currentColor"
-                strokeWidth="6"
-                strokeDasharray="201"
-                strokeDashoffset={201 - (201 * overallScore) / 100}
-                strokeLinecap="round"
-                className="text-cyan-400 transition-all duration-1000"
-                fill="transparent"
-              />
-            </svg>
-            <div className="absolute flex flex-col items-center">
-              <span className="text-xl font-bold text-white leading-none">{overallScore}%</span>
-              <span className="text-[9px] uppercase font-semibold text-slate-400 mt-0.5">Readiness</span>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              Role Readiness Estimate
-              <span className="rounded bg-indigo-500/20 text-indigo-300 text-[9px] px-1.5 py-0.5">Empirical</span>
+    <div className="space-y-8 max-w-6xl mx-auto py-2">
+      {/* 1. WELCOME SECTION */}
+      <div className="border-b border-[#27303B] pb-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-1.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#5B8DEF]/10 text-[#5B8DEF]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#5B8DEF]" />
+              AI Career Intelligence Command Center
             </span>
-            <p className="text-[11px] text-slate-400 leading-tight">
-              AI-assisted estimate grounded in verified evidence. Not a guaranteed job offer.
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#F5F7FA] tracking-tight">
+              Hello, {firstName}.
+            </h1>
+            <p className="text-sm font-semibold text-[#5B8DEF]">
+              Learn with purpose. Prove your skills. Build your future.
             </p>
           </div>
+
+          <div className="flex items-center space-x-2.5 shrink-0">
+            <Link
+              href="/job-analysis"
+              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-sm hover:bg-[#4779D8] transition-all"
+            >
+              <Briefcase className="h-3.5 w-3.5" />
+              <span>ATS Gap Analyzer</span>
+            </Link>
+            <Link
+              href="/learn"
+              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#151B23] border border-[#27303B] text-[#F5F7FA] text-xs font-semibold hover:bg-[#1A212B] transition-all"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-[#B4BDC8]" />
+              <span>Continue Learning</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Editorial Quote */}
+        <div className="border-l-2 border-[#5B8DEF]/40 pl-3.5 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
+          “True career readiness isn’t about how much content you’ve watched. It’s about what you can demonstrate under real-world scrutiny.”
+        </div>
+
+        {/* Progression Steps */}
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B4BDC8] bg-[#151B23] p-3 rounded-xl border border-[#27303B]">
+          <span className="text-[10px] uppercase font-bold text-[#7E8996] mr-1">Progression:</span>
+          <span className="text-[#F5F7FA] font-bold">1. Target Role</span>
+          <span className="text-[#CBD2CB]">→</span>
+          <span className="text-[#5B8DEF] font-bold">2. Current Readiness</span>
+          <span className="text-[#CBD2CB]">→</span>
+          <span className="text-[#F5F7FA] font-bold">3. Skill Gaps</span>
+          <span className="text-[#CBD2CB]">→</span>
+          <span className="text-[#5B8DEF] font-bold">4. Next Best Action</span>
         </div>
       </div>
 
-      {/* 2. NEXT BEST ACTION BANNER (The Core Highlight!) */}
-      {activeNode && (
-        <div className={`rounded-2xl border p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-xl ${
-          activeNode.is_remediation
-            ? "border-rose-500/60 bg-gradient-to-r from-rose-950/40 via-[#101424] to-[#0a101d]"
-            : "border-indigo-500/40 bg-gradient-to-r from-indigo-950/30 via-[#0d1526] to-[#0a101d]"
-        }`}>
-          <div className="flex items-start space-x-4">
-            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl shrink-0 ${
-              activeNode.is_remediation
-                ? "bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse"
-                : "bg-indigo-500/20 text-cyan-400 border border-indigo-500/40"
-            }`}>
-              {activeNode.is_remediation ? <AlertTriangle className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Next Best Action</span>
-                {activeNode.is_remediation && (
-                  <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/40">
-                    Remediation Required
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-bold text-white mt-0.5">
-                {activeNode.title}
-              </h3>
-              <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                {activeNode.description}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 shrink-0">
-            <Link
-              href={`/tutor?topic=${encodeURIComponent(activeNode.title)}`}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:bg-white/10 transition-colors"
-            >
-              Ask Raizo Tutor
-            </Link>
-            <Link
-              href={`/assessment?skill=${activeNode.skill_id}&node=${activeNode.id}&title=${encodeURIComponent(activeNode.title)}`}
-              className="rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:from-indigo-500 hover:to-cyan-400 transition-all flex items-center gap-1.5"
-            >
-              <span>{activeNode.is_remediation ? "Start Remediation Checkpoint" : "Launch Activity"}</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* 3. FOUR KEY METRIC TILES */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Verified Skills</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold text-white">
-            {gaps?.proficient_count ?? 2} <span className="text-xs text-slate-400 font-normal">Proficient</span>
-          </div>
-          <p className="text-[11px] text-emerald-400 flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> +11% velocity this sprint
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Developing / Partial</span>
-            <Layers className="h-4 w-4 text-cyan-400" />
-          </div>
-          <div className="text-2xl font-bold text-white">
-            {gaps?.partial_count ?? 3} <span className="text-xs text-slate-400 font-normal">In Progress</span>
-          </div>
-          <p className="text-[11px] text-slate-400">Targeting 70% threshold</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Needs Remediation</span>
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
-          </div>
-          <div className="text-2xl font-bold text-white">
-            {gaps?.missing_count ?? 2} <span className="text-xs text-slate-400 font-normal">Gaps</span>
-          </div>
-          <p className="text-[11px] text-amber-300">Prerequisite weaknesses detected</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Study Velocity</span>
-            <Clock className="h-4 w-4 text-purple-400" />
-          </div>
-          <div className="text-2xl font-bold text-white">
-            6.5 / 8.0 <span className="text-xs text-slate-400 font-normal">Hrs/Wk</span>
-          </div>
-          <p className="text-[11px] text-indigo-400">4-Day Learning Streak 🔥</p>
-        </div>
-      </div>
-
-      {/* 4. MAIN WORKSPACE SPLIT: DAG Roadmap Preview & Recent Evidence */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left 2 Cols: DAG Roadmap Preview */}
-        <div className="lg:col-span-2 rounded-3xl border border-white/10 bg-[#0d1424] p-6 space-y-5 shadow-xl">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <GitBranch className="h-5 w-5 text-indigo-400" />
-                Adaptive Learning Path (DAG)
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Topological milestone graph with prerequisite dependency locks
-              </p>
-            </div>
-            <Link
-              href="/roadmap"
-              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-            >
-              <span>Full Graph View</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
+      {/* 2. CAREER TARGET & READINESS TWIN CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Career Target Card */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-7 space-y-4 shadow-xs flex flex-col justify-between">
           <div className="space-y-3">
-            {roadmap?.nodes.slice(0, 5).map((node) => (
-              <div
-                key={node.id}
-                className={`flex items-center justify-between rounded-xl border p-3.5 text-xs transition-all ${
-                  node.is_remediation
-                    ? "border-rose-500/50 bg-rose-950/20"
-                    : node.status === "passed"
-                    ? "border-emerald-500/30 bg-emerald-950/10"
-                    : node.status === "available"
-                    ? "border-cyan-500/40 bg-cyan-950/10"
-                    : "border-white/5 bg-white/5 opacity-60"
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  {node.status === "passed" ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  ) : node.is_remediation ? (
-                    <AlertTriangle className="h-4 w-4 text-rose-400 shrink-0" />
-                  ) : node.status === "available" ? (
-                    <div className="h-3 w-3 rounded-full bg-cyan-400 animate-ping" />
-                  ) : (
-                    <div className="h-3 w-3 rounded-full bg-slate-600" />
-                  )}
-                  <div>
-                    <h4 className="font-bold text-white">{node.title}</h4>
-                    <span className="text-[10px] text-slate-400">{node.learning_objective}</span>
-                  </div>
-                </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#7E8996]">
+                CAREER TARGET
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#5B8DEF] bg-[#11161D] px-2.5 py-1 rounded-lg border border-[#27303B]">
+                <Briefcase className="h-3 w-3" />
+                Active Goal
+              </span>
+            </div>
 
-                <div className="text-right shrink-0">
-                  <span className="text-[11px] font-mono text-slate-400">{node.estimated_duration_minutes}m</span>
-                </div>
+            <div>
+              <span className="text-xs font-medium text-[#B4BDC8] block">Target Role</span>
+              <h2 className="text-2xl font-extrabold text-[#F5F7FA]">
+                {targetRole}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs border-t border-[#27303B]">
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-[#7E8996] block">Current Role</span>
+                <span className="font-semibold text-[#F5F7FA]">{currentRole}</span>
               </div>
-            ))}
+              <div className="space-y-0.5">
+                <span className="text-[11px] text-[#7E8996] block">Commitment</span>
+                <span className="font-semibold text-[#F5F7FA]">{weeklyHours} hours / week</span>
+              </div>
+            </div>
+
+            <div className="space-y-0.5 text-xs">
+              <span className="text-[11px] text-[#7E8996] block">Career Goal</span>
+              <p className="text-[#B4BDC8] font-medium leading-snug">{careerGoal}</p>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-[#27303B] flex items-center justify-between text-xs">
+            <Link
+              href="/profile"
+              className="text-[#5B8DEF] font-semibold hover:underline flex items-center gap-1"
+            >
+              <span>Edit career parameters</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
 
-        {/* Right 1 Col: Recent Evidence Ledger Stream */}
-        <div className="rounded-3xl border border-white/10 bg-[#0d1424] p-6 space-y-5 shadow-xl flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                  Evidence Ledger
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Audit trail supporting competency scores
-                </p>
-              </div>
-              <Link
-                href="/evidence"
-                className="text-xs font-semibold text-cyan-400 hover:text-cyan-300"
-              >
-                View All
-              </Link>
+        {/* Career Readiness Card */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-7 space-y-4 shadow-xs flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#7E8996]">
+                CAREER READINESS
+              </span>
+              <span className="text-xs font-semibold text-[#36C98F] bg-[#5B8DEF]/10 px-2.5 py-0.5 rounded-full">
+                On Track
+              </span>
             </div>
 
-            <div className="mt-4 space-y-3">
-              {evidenceList.slice(0, 4).map((evi) => (
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-[#B4BDC8] block">{targetRole} Readiness</span>
+              <div className="flex items-baseline space-x-3">
+                <span className="text-4xl font-extrabold font-mono text-[#F5F7FA]">
+                  {readinessPercent}%
+                </span>
+                <span className="text-xs font-semibold text-[#5B8DEF]">
+                  Target: 70% reached
+                </span>
+              </div>
+            </div>
+
+            {/* Simple progress bar */}
+            <div className="space-y-1.5 pt-1">
+              <div className="h-3 w-full rounded-full bg-[#1A212B] overflow-hidden">
                 <div
-                  key={evi.id}
-                  className="rounded-xl border border-white/5 bg-[#101728] p-3 text-xs space-y-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white truncate max-w-[170px]">
-                      {evi.source_title}
-                    </span>
-                    <span className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
-                      evi.confidence === "high"
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : evi.confidence === "medium"
-                        ? "bg-cyan-500/20 text-cyan-300"
-                        : "bg-amber-500/20 text-amber-300"
-                    }`}>
-                      {evi.confidence.toUpperCase()} CONF
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="capitalize">{evi.evidence_type.replace("_", " ")}</span>
-                    {evi.score !== null && evi.score !== undefined && (
-                      <span className="font-mono text-indigo-300">{evi.score}%</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  className="h-full rounded-full bg-[#5B8DEF] transition-all duration-700"
+                  style={{ width: `${readinessPercent}%` }}
+                />
+              </div>
+              <p className="text-xs font-semibold text-[#F5F7FA]">
+                8 skills verified · 3 skills developing
+              </p>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10">
+          <div className="pt-3 border-t border-[#27303B] flex items-center justify-between text-xs">
+            <Link
+              href="/skills"
+              className="text-[#5B8DEF] font-semibold hover:underline flex items-center gap-1"
+            >
+              <span>View Verified Skills</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
             <Link
               href="/assessment"
-              className="w-full flex items-center justify-center space-x-2 rounded-xl bg-white/5 border border-white/10 py-2.5 text-xs font-semibold text-white hover:bg-white/10 transition-colors"
+              className="text-[#B4BDC8] font-semibold hover:text-[#F5F7FA] flex items-center gap-1"
             >
-              <span>Take New Assessment</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>Diagnostic Breakdown</span>
+              <ArrowRight className="h-3 w-3" />
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. RECOMMENDED NEXT STEP HERO BANNER */}
+      <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-8 space-y-4 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF] block">
+              RECOMMENDED NEXT STEP
+            </span>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-[#F5F7FA]">
+              Strengthen SQL Window Functions
+            </h3>
+            <p className="text-xs sm:text-sm text-[#B4BDC8] leading-relaxed">
+              Your current SQL evidence shows strong fundamentals. Complete the Window Functions checkpoint to improve your role readiness.
+            </p>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-3">
+            <Link
+              href="/practice"
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-sm hover:bg-[#4779D8] transition-all"
+            >
+              <span>Continue</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/learn"
+              className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#11161D] border border-[#27303B] text-[#F5F7FA] text-xs font-semibold hover:bg-[#1A212B] transition-all"
+            >
+              <span>Ask Tutor</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Signature Interactive Skill Overview */}
+        <div className="pt-4 border-t border-[#27303B]">
+          <RaizoSkillGraph />
+        </div>
+      </div>
+
+      {/* 4. LEARNING PROGRESS & RECENT ACTIVITY DUAL COLUMNS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Learning Progress Summary */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-xs">
+          <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-[#F5F7FA]">Learning Progress</h3>
+              <p className="text-xs text-[#B4BDC8]">Key milestones completed along your journey</p>
+            </div>
+            <Link href="/skills" className="text-xs font-semibold text-[#5B8DEF] hover:underline">
+              View All Skills
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-3.5 rounded-xl bg-[#11161D] border border-[#27303B] space-y-1">
+              <span className="text-[11px] text-[#B4BDC8] block">Courses completed</span>
+              <span className="text-xl font-bold font-mono text-[#F5F7FA]">3</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#11161D] border border-[#27303B] space-y-1">
+              <span className="text-[11px] text-[#B4BDC8] block">Practice activities</span>
+              <span className="text-xl font-bold font-mono text-[#F5F7FA]">12</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#11161D] border border-[#27303B] space-y-1">
+              <span className="text-[11px] text-[#B4BDC8] block">Assessments</span>
+              <span className="text-xl font-bold font-mono text-[#F5F7FA]">4</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#11161D] border border-[#27303B] space-y-1">
+              <span className="text-[11px] text-[#B4BDC8] block">Projects completed</span>
+              <span className="text-xl font-bold font-mono text-[#F5F7FA]">1</span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#5B8DEF]/10/50 border border-[#5B8DEF]/30 space-y-1 sm:col-span-2">
+              <span className="text-[11px] text-[#5B8DEF] font-semibold block">Skills verified</span>
+              <div className="flex items-baseline space-x-2">
+                <span className="text-xl font-bold font-mono text-[#5B8DEF]">8</span>
+                <span className="text-[11px] text-[#36C98F] font-semibold">Ready for portfolio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Meaningful Activity */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-xs">
+          <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-[#F5F7FA]">Recent Activity</h3>
+              <p className="text-xs text-[#B4BDC8]">Your verified accomplishments</p>
+            </div>
+            <span className="text-xs text-[#7E8996]">Recent</span>
+          </div>
+
+          <div className="space-y-2.5">
+            {recentActivities.map((act) => {
+              const Icon = act.icon;
+              return (
+                <div
+                  key={act.id}
+                  className="flex items-center justify-between p-3 rounded-xl border border-[#27303B] bg-[#11161D] text-xs hover:border-[#5B8DEF]/40 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-8 w-8 rounded-lg bg-[#151B23] border border-[#27303B] flex items-center justify-center text-[#5B8DEF] shrink-0">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-[#F5F7FA]">{act.title}</h4>
+                      <span className="text-[10px] text-[#7E8996]">{act.time}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#151B23] text-[#B4BDC8] border border-[#27303B]">
+                    {act.tag}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

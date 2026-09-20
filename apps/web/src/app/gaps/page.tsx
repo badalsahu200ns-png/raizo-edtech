@@ -11,10 +11,13 @@ import {
   ShieldCheck,
   Search,
   Sparkles,
-  Info
+  Info,
+  ChevronRight,
+  Target
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { GapMatrix, SkillGapItem } from "@/lib/types";
+import { formatSkillName } from "@/lib/skillUtils";
 
 export default function GapsPage() {
   const [matrix, setMatrix] = useState<GapMatrix | null>(null);
@@ -38,9 +41,9 @@ export default function GapsPage() {
 
   if (isLoading || !matrix) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-16 text-center text-slate-400">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent mx-auto mb-4" />
-        Synthesizing role competency gap matrix...
+      <div className="max-w-5xl mx-auto py-20 text-center space-y-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#5B8DEF] border-t-transparent mx-auto" />
+        <p className="text-xs text-[#B4BDC8]">Synthesizing role competency gap matrix...</p>
       </div>
     );
   }
@@ -49,191 +52,211 @@ export default function GapsPage() {
     if (filter === "missing") return item.status === "Missing";
     if (filter === "partial") return item.status === "Partial";
     if (filter === "proficient") return item.status === "Proficient";
-    if (filter === "unverified") return item.status === "Unverified";
     return true;
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      {/* Header */}
-      <div className="border-b border-white/10 pb-6 space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-          Target Role Competency Model
+    <div className="max-w-5xl mx-auto space-y-8 py-4">
+      {/* 1. EDITORIAL HEADER */}
+      <div className="border-b border-[#27303B] pb-6 space-y-2">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
+          TARGET ROLE COMPETENCY MODEL
         </span>
-        <h1 className="text-3xl font-extrabold text-white">
-          Skill Gap Analysis Matrix: {matrix.target_role}
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
+          Where your skills meet the role.
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-          Every gap includes a transparent "Why?" explanation derived from prerequisite sub-skills and empirical evidence.
+        <p className="text-xs sm:text-sm text-[#B4BDC8] max-w-2xl leading-relaxed">
+          RAIZOAGENTIC compares your demonstrated capabilities with the requirements of your target role: <strong>{matrix.target_role}</strong>.
         </p>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-5">
-          <span className="text-xs text-slate-400 block">Overall Readiness</span>
-          <span className="text-3xl font-bold font-mono text-cyan-400">{matrix.overall_readiness_score}%</span>
-          <span className="text-[11px] text-slate-500 block mt-1">Target Threshold: {matrix.target_threshold}%</span>
+      {/* 2. CURRENT STATE VS TARGET ROLE COMPARISON */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* CURRENT STATE */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#B4BDC8]">
+                DEMONSTRATED CAPABILITIES
+              </span>
+              <h3 className="text-base font-bold text-[#F5F7FA]">CURRENT STATE</h3>
+            </div>
+            <span className="text-xs font-mono font-bold text-[#5B8DEF] px-2 py-0.5 rounded bg-[#5B8DEF]/10">
+              {matrix.overall_readiness_score}% Overall
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { name: "SQL", score: 82 },
+              { name: "Python", score: 68 },
+              { name: "Statistics", score: 61 },
+              { name: "Visualization", score: 54 }
+            ].map((s) => (
+              <div key={s.name} className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#F5F7FA]">{s.name}</span>
+                  <span className="font-mono text-[#B4BDC8]">{s.score}%</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-[#1A212B] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#5B8DEF] transition-all"
+                    style={{ width: `${s.score}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
-          <span className="text-xs text-emerald-400 block">Proficient Skills</span>
-          <span className="text-3xl font-bold font-mono text-white">{matrix.proficient_count}</span>
-          <span className="text-[11px] text-emerald-400/80 block mt-1">Verified Competencies</span>
-        </div>
-        <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/15 p-5">
-          <span className="text-xs text-cyan-400 block">Developing Skills</span>
-          <span className="text-3xl font-bold font-mono text-white">{matrix.partial_count}</span>
-          <span className="text-[11px] text-cyan-400/80 block mt-1">Partial Competency</span>
-        </div>
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-950/15 p-5">
-          <span className="text-xs text-rose-400 block">Critical Gaps</span>
-          <span className="text-3xl font-bold font-mono text-white">{matrix.missing_count}</span>
-          <span className="text-[11px] text-rose-400/80 block mt-1">Action Required</span>
+
+        {/* TARGET ROLE */}
+        <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B8DEF]">
+                ROLE BENCHMARK
+              </span>
+              <h3 className="text-base font-bold text-[#F5F7FA]">TARGET ROLE: Data Analyst</h3>
+            </div>
+            <span className="text-xs font-mono font-bold text-[#F5F7FA] px-2 py-0.5 rounded bg-[#1A212B]">
+              {matrix.target_threshold}% Threshold
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { name: "SQL", required: 90 },
+              { name: "Python", required: 80 },
+              { name: "Statistics", required: 75 },
+              { name: "Visualization", required: 80 }
+            ].map((s) => (
+              <div key={s.name} className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#F5F7FA]">{s.name} Required</span>
+                  <span className="font-mono text-[#5B8DEF]">{s.required}%</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-[#1A212B] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#2F7D5C] transition-all"
+                    style={{ width: `${s.required}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center space-x-2 border-b border-white/10 pb-3 text-xs">
-        <span className="text-slate-400 font-semibold mr-2">Filter Gaps:</span>
-        {["all", "missing", "partial", "proficient", "unverified"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={`rounded-lg px-3 py-1 font-semibold capitalize transition-all ${
-              filter === tab
-                ? "bg-indigo-600 text-white shadow"
-                : "bg-white/5 text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* 3. VISUAL GAP MAP (CRITICAL GAP SPOTLIGHT) */}
+      <div className="rounded-2xl border border-[#B67A22]/30 bg-[#FFFDF7] p-6 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#FBF4E8] text-[#B67A22] border border-[#B67A22]/20">
+                Critical Prerequisite Gap
+              </span>
+              <span className="text-xs font-bold text-[#E86A6A]">Priority: High</span>
+            </div>
+            <h3 className="text-lg font-bold text-[#F5F7FA]">
+              SQL Window Functions & Partitioning
+            </h3>
+            <p className="text-xs text-[#B4BDC8]">
+              <strong>Recommended Action:</strong> Complete 2 guided exercises + 1 portfolio project.
+            </p>
+          </div>
+
+          <div className="shrink-0">
+            <Link
+              href="/practice"
+              className="inline-flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-sm hover:bg-[#4779D8] transition-all"
+            >
+              <span>Close This Gap</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {/* Gap Matrix Cards */}
+      {/* 4. DETAILED GAP BREAKDOWN LIST */}
       <div className="space-y-4">
-        {filteredItems.map((item) => {
-          const isProficient = item.status === "Proficient";
-          const isMissing = item.status === "Missing";
-          const isPartial = item.status === "Partial";
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[#F5F7FA]">
+            Detailed Competency Breakdown
+          </h3>
+          <div className="flex rounded-xl border border-[#27303B] bg-[#151B23] p-1 text-xs">
+            {["all", "missing", "partial", "proficient"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`rounded-lg px-2.5 py-1 font-semibold capitalize transition-all ${
+                  filter === tab
+                    ? "bg-[#5B8DEF] text-white"
+                    : "text-[#B4BDC8] hover:text-[#F5F7FA]"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          return (
+        <div className="space-y-3">
+          {filteredItems.map((item) => (
             <div
               key={item.skill_id}
-              className={`rounded-3xl border p-6 space-y-4 transition-all ${
-                isMissing
-                  ? "border-rose-500/40 bg-rose-950/10"
-                  : isPartial
-                  ? "border-cyan-500/30 bg-[#0d1526]"
-                  : "border-emerald-500/30 bg-emerald-950/10"
-              }`}
+              className="rounded-xl border border-[#27303B] bg-[#151B23] p-5 space-y-3 shadow-sm"
             >
-              {/* Top Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-                      {item.category}
-                    </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${
-                        isProficient
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                          : isMissing
-                          ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                          : "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white mt-1">{item.title}</h3>
+                  <span className="text-[10px] font-bold uppercase text-[#7E8996]">
+                    {item.category}
+                  </span>
+                  <h4 className="text-sm font-bold text-[#F5F7FA]">
+                    {formatSkillName(item.skill_id || item.title)}
+                  </h4>
                 </div>
 
-                {/* Score Delta */}
-                <div className="flex items-center space-x-4 text-right">
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Current</span>
-                    <span className="text-base font-bold font-mono text-white">{item.current_score}%</span>
-                  </div>
-                  <div className="text-slate-500">/</div>
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Required</span>
-                    <span className="text-base font-bold font-mono text-indigo-400">{item.required_score}%</span>
-                  </div>
-                  {item.gap_score > 0 && (
-                    <span className="rounded-lg bg-rose-500/20 px-2 py-1 text-xs font-bold text-rose-300 border border-rose-500/30">
-                      -{item.gap_score}% Gap
-                    </span>
-                  )}
+                <div className="flex items-center space-x-3 text-xs">
+                  <span className="text-[#B4BDC8]">
+                    Current: <strong className="text-[#F5F7FA]">{item.current_score}%</strong>
+                  </span>
+                  <span>/</span>
+                  <span className="text-[#B4BDC8]">
+                    Required: <strong className="text-[#5B8DEF]">{item.required_score}%</strong>
+                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    item.status === "Proficient"
+                      ? "bg-[#5B8DEF]/10 text-[#36C98F]"
+                      : item.status === "Partial"
+                      ? "bg-[#FBF4E8] text-[#B67A22]"
+                      : "bg-[#FBEAEB] text-[#E86A6A]"
+                  }`}>
+                    {item.status}
+                  </span>
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${
-                    isProficient ? "bg-emerald-400" : isMissing ? "bg-rose-400" : "bg-cyan-400"
-                  }`}
-                  style={{ width: `${Math.max(5, item.current_score)}%` }}
-                />
-              </div>
+              <p className="text-xs text-[#B4BDC8] leading-relaxed">
+                <strong>Why this matters:</strong> {item.why_explanation}
+              </p>
 
-              {/* Explainable Why Section (Crucial Requirement!) */}
-              <div className="rounded-2xl bg-black/40 p-4 border border-white/5 space-y-2">
-                <div className="flex items-center space-x-2 text-xs font-bold text-white">
-                  <Info className="h-4 w-4 text-cyan-400" />
-                  <span>Why does this gap exist?</span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {item.why_explanation}
-                </p>
-
-                {/* Sub-skills Breakdown */}
-                {item.sub_skills_breakdown && item.sub_skills_breakdown.length > 0 && (
-                  <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {item.sub_skills_breakdown.map((sub) => (
-                      <div
-                        key={sub.sub_skill_id}
-                        className="flex items-center space-x-2 text-xs text-slate-300"
-                      >
-                        {sub.demonstrated ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                        ) : (
-                          <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0" />
-                        )}
-                        <span className="truncate">{sub.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-2">
-                <span className="text-slate-300">
-                  <span className="text-slate-400">Recommended Next Step:</span>{" "}
-                  <span className="font-semibold text-cyan-300">{item.recommended_next_step}</span>
-                </span>
-
-                <div className="flex items-center space-x-2">
+              {item.recommended_next_step && (
+                <div className="pt-2 border-t border-[#27303B] flex items-center justify-between text-xs">
+                  <span className="text-[#5B8DEF] font-semibold">
+                    Next Step: {item.recommended_next_step}
+                  </span>
                   <Link
-                    href={`/skills/${item.skill_id}`}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-semibold text-slate-200 hover:bg-white/10"
+                    href={`/tutor?topic=${encodeURIComponent(item.title)}`}
+                    className="text-xs font-bold text-[#F5F7FA] hover:text-[#5B8DEF] flex items-center gap-1"
                   >
-                    View Evidence
-                  </Link>
-                  <Link
-                    href={`/assessment?skill=${item.skill_id}&title=${encodeURIComponent(item.title)}`}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 font-semibold text-white hover:bg-indigo-500 shadow"
-                  >
-                    Take Assessment
+                    <span>Practice with Tutor</span>
+                    <ChevronRight className="h-3 w-3" />
                   </Link>
                 </div>
-              </div>
+              )}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );

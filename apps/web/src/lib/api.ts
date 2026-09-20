@@ -7,10 +7,27 @@ import {
   Assessment,
   EvaluationResult,
   TutorMessage,
-  AuditLogEntry
+  AuditLogEntry,
+  GoogleAuthResponse,
+  Certificate,
+  CertificateEligibility,
+  JobListing,
+  ATSAnalysisResult,
+  BulletAnalysis,
+  JobApplication
 } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+
+function getAuthHeader(): Record<string, string> {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("raizo_token");
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+  }
+  return {};
+}
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
@@ -18,6 +35,7 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
       ...options,
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeader(),
         ...(options?.headers || {})
       },
       cache: "no-store"
@@ -34,25 +52,90 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 }
 
 export const api = {
-  // Profile & Onboarding
-  getProfile: (userId = "demo_learner_alex") =>
-    fetchAPI<{ user: UserProfile; latest_resume: any; skills: LearnerSkill[] }>(
-      `/profile?user_id=${userId}`
-    ),
-
-  updateProfile: (data: Partial<UserProfile>, userId = "demo_learner_alex") =>
-    fetchAPI<{ success: boolean; message: string }>(`/profile?user_id=${userId}`, {
-      method: "PUT",
-      body: JSON.stringify(data)
+  // Google Authentication Only
+  googleAuth: (credential: string) =>
+    fetchAPI<GoogleAuthResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential })
     }),
 
-  uploadResume: async (file: File, userId = "demo_learner_alex") => {
+  logout: () =>
+    fetchAPI<{ success: boolean; message: string }>("/auth/logout", {
+      method: "POST"
+    }),
+
+  getMe: () =>
+    fetchAPI<{ authenticated?: boolean; user: UserProfile | null; is_demo?: boolean }>("/auth/me"),
+
+  // Profile & Resume Lifecycle
+  uploadResumeFile: async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("user_id", userId);
+
+    const res = await fetch(`${API_BASE}/profile/upload-resume`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeader()
+      },
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Failed to parse resume");
+    }
+    return res.json();
+  },
+
+  getActiveResume: () =>
+    fetchAPI<{ has_resume: boolean; document: any }>("/profile/resume"),
+
+  deleteResume: (documentId: string) =>
+    fetchAPI<{ success: boolean; message: string }>(`/profile/resume/${documentId}`, {
+      method: "DELETE"
+    }),
+
+  reprocessResume: (documentId: string) =>
+    fetchAPI<{ success: boolean; message: string; extracted_profile: any }>(
+      `/profile/resume/${documentId}/reprocess`,
+      { method: "POST" }
+    ),
+
+  confirmResumeProfile: (documentId: string, payload: any) =>
+    fetchAPI<{ success: boolean; message: string; skills_registered: number }>(
+      `/profile/resume/${documentId}/confirm`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload)
+      }
+    ),
+
+  getProfile: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ user: UserProfile; latest_resume: any; skills: LearnerSkill[] }>(
+      `/profile${query}`
+    );
+  },
+
+  updateProfile: (data: Partial<UserProfile>, userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ success: boolean; message: string }>(`/profile${query}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+  },
+
+  uploadResume: async (file: File, userId?: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (userId) {
+      formData.append("user_id", userId);
+    }
 
     const res = await fetch(`${API_BASE}/profile/upload`, {
       method: "POST",
+      headers: {
+        ...getAuthHeader()
+      },
       body: formData
     });
     if (!res.ok) {
@@ -69,28 +152,44 @@ export const api = {
     }),
 
   // Skills & Gaps
-  getSkills: (userId = "demo_learner_alex") =>
-    fetchAPI<{ skills: LearnerSkill[] }>(`/skills?user_id=${userId}`),
+  getSkills: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ skills: LearnerSkill[] }>(`/skills${query}`);
+  },
 
-  getSkillDetail: (skillId: string, userId = "demo_learner_alex") =>
-    fetchAPI<{
+  getSkillDetail: (skillId: string, userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{
       skill: LearnerSkill;
       evidence_history: EvidenceItem[];
       submissions: any[];
       recommended_resources: any[];
-    }>(`/skills/${skillId}?user_id=${userId}`),
+    }>(`/skills/${skillId}${query}`);
+  },
 
-  getGaps: (userId = "demo_learner_alex", targetRole = "data_analyst") =>
-    fetchAPI<GapMatrix>(`/gaps?user_id=${userId}&target_role=${targetRole}`),
+  getGaps: (userId?: string, targetRole = "data_analyst") => {
+    const params = new URLSearchParams();
+    if (userId) params.append("user_id", userId);
+    if (targetRole) params.append("target_role", targetRole);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return fetchAPI<GapMatrix>(`/gaps${query}`);
+  },
 
   // Roadmap DAG
-  getRoadmap: (userId = "demo_learner_alex") =>
-    fetchAPI<RoadmapDAG>(`/roadmap?user_id=${userId}`),
+  getRoadmap: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<RoadmapDAG>(`/roadmap${query}`);
+  },
 
-  generateRoadmap: (userId = "demo_learner_alex", targetRole = "data_analyst") =>
-    fetchAPI<RoadmapDAG>(`/roadmap/generate?user_id=${userId}&target_role=${targetRole}`, {
+  generateRoadmap: (userId?: string, targetRole = "data_analyst") => {
+    const params = new URLSearchParams();
+    if (userId) params.append("user_id", userId);
+    if (targetRole) params.append("target_role", targetRole);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return fetchAPI<RoadmapDAG>(`/roadmap/generate${query}`, {
       method: "POST"
-    }),
+    });
+  },
 
   // Assessments
   generateAssessment: (type = "diagnostic", skillId?: string, nodeTitle?: string) => {
@@ -115,6 +214,8 @@ export const api = {
     fetchAPI<{
       evaluation: EvaluationResult;
       adaptation: any;
+      certificate?: any;
+      diagnostic?: any;
     }>("/assessment/submit", {
       method: "POST",
       body: JSON.stringify(payload)
@@ -126,22 +227,29 @@ export const api = {
     message: string;
     mode: string;
     current_node_id?: string;
+    dataset_context?: Record<string, any>;
   }) =>
     fetchAPI<TutorMessage>("/tutor/message", {
       method: "POST",
       body: JSON.stringify(payload)
     }),
 
-  getTutorHistory: (userId = "demo_learner_alex") =>
-    fetchAPI<{ messages: any[] }>(`/tutor/history?user_id=${userId}`),
+  getTutorHistory: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ messages: any[] }>(`/tutor/history${query}`);
+  },
 
   // Evidence Ledger
-  getEvidence: (userId = "demo_learner_alex") =>
-    fetchAPI<{ evidence: EvidenceItem[] }>(`/evidence?user_id=${userId}`),
+  getEvidence: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ evidence: EvidenceItem[] }>(`/evidence${query}`);
+  },
 
   // Reports
-  getWeeklyReport: (userId = "demo_learner_alex") =>
-    fetchAPI<any>(`/reports/weekly?user_id=${userId}`),
+  getWeeklyReport: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<any>(`/reports/weekly${query}`);
+  },
 
   // Job Analyzer
   analyzeJob: (payload: {
@@ -156,8 +264,10 @@ export const api = {
     }),
 
   // Projects
-  getProjects: (userId = "demo_learner_alex") =>
-    fetchAPI<{ projects: any[] }>(`/projects?user_id=${userId}`),
+  getProjects: (userId?: string) => {
+    const query = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+    return fetchAPI<{ projects: any[] }>(`/projects${query}`);
+  },
 
   submitProject: (payload: {
     user_id?: string;
@@ -191,5 +301,132 @@ export const api = {
     fetchAPI<{ success: boolean; message: string }>("/override", {
       method: "POST",
       body: JSON.stringify(payload)
-    })
+    }),
+
+  // RAIZO Learning Completion Certificate Endpoints
+  checkCertificateEligibility: () =>
+    fetchAPI<CertificateEligibility>("/certificate/eligibility"),
+
+  generateCertificate: (data?: { recipient_name?: string; track_title?: string }) =>
+    fetchAPI<{ success: boolean; certificate: Certificate; message: string }>("/certificate/generate", {
+      method: "POST",
+      body: JSON.stringify(data || {})
+    }),
+
+  getCertificates: () =>
+    fetchAPI<{ certificates: Certificate[] }>("/certificate"),
+
+  getCertificate: (id: string) =>
+    fetchAPI<{ certificate: Certificate }>(`/certificate/${id}`),
+
+  verifyCertificate: (certificateId: string) =>
+    fetchAPI<{ valid: boolean; certificate: Certificate | null; error?: string }>(
+      `/certificate/verify/${certificateId}`
+    ),
+
+  getCertificatePdfUrl: (certificateId: string) =>
+    `${API_BASE}/certificate/${certificateId}/pdf`,
+
+  getCertificateQrUrl: (certificateId: string) =>
+    `${API_BASE}/certificate/${certificateId}/qr`,
+
+  // Career Intelligence & Universal ATS Gap Analyzer
+  getCareerTaxonomy: () =>
+    fetchAPI<{ roles: Record<string, any> }>("/career-intelligence/taxonomy"),
+
+  getCareerJobs: (params?: { q?: string; company_type?: string; family?: string; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.q) searchParams.append("q", params.q);
+    if (params?.company_type) searchParams.append("company_type", params.company_type);
+    if (params?.family) searchParams.append("family", params.family);
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    const query = searchParams.toString();
+    return fetchAPI<{ jobs: JobListing[]; total: number }>(`/career-intelligence/jobs${query ? `?${query}` : ""}`);
+  },
+
+  getCareerJobById: (jobId: string) =>
+    fetchAPI<JobListing>(`/career-intelligence/jobs/${jobId}`),
+
+  analyzeCareerFit: (data: {
+    resume_text?: string;
+    job_id?: string;
+    job_title?: string;
+    company?: string;
+    company_type?: string;
+    role_family?: string;
+    job_description_text?: string;
+  }) =>
+    fetchAPI<{ analysis_id: string; job_info: JobListing; result: ATSAnalysisResult }>(
+      "/career-intelligence/analyze",
+      {
+        method: "POST",
+        body: JSON.stringify(data)
+      }
+    ),
+
+  analyzeBullet: (bullet: string, target_role?: string) =>
+    fetchAPI<BulletAnalysis>("/career-intelligence/bullet-analyzer", {
+      method: "POST",
+      body: JSON.stringify({ bullet, target_role })
+    }),
+
+  getJobApplications: () =>
+    fetchAPI<{ applications: JobApplication[] }>("/career-intelligence/applications"),
+
+  saveJobApplication: (data: Partial<JobApplication>) =>
+    fetchAPI<{ success: boolean; id: string; status: string }>("/career-intelligence/applications", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+
+  getCareerAnalysisHistory: () =>
+    fetchAPI<{ history: any[] }>("/career-intelligence/history"),
+
+  // Data Analysis Lab
+  uploadDataLabFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE}/data-lab/upload`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeader()
+      },
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Upload failed with status ${res.status}`);
+    }
+    return res.json();
+  },
+
+  analyzeDataLabDataset: (data: {
+    filename: string;
+    file_type?: string;
+    columns: string[];
+    rows: Record<string, any>[];
+  }) =>
+    fetchAPI<{ success: boolean; analysis: any }>("/data-lab/analyze", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+
+  cleanDataLabDataset: (data: {
+    columns: string[];
+    rows: Record<string, any>[];
+    actions: any[];
+  }) =>
+    fetchAPI<{
+      success: boolean;
+      cleaned_rows: Record<string, any>[];
+      row_count: number;
+      transformations: any[];
+      analysis: any;
+    }>("/data-lab/clean", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+
+  getDataLabSamples: () =>
+    fetchAPI<{ samples: any[] }>("/data-lab/samples")
 };

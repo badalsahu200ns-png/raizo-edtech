@@ -4,24 +4,25 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Brain,
   Compass,
-  GitBranch,
   BookOpen,
-  MessageSquare,
   Award,
   FileCheck2,
   BarChart3,
-  Search,
   CheckCircle2,
   Layers,
   Sparkles,
   Activity,
-  RotateCcw,
   Menu,
-  X
+  X,
+  Briefcase,
+  FileText,
+  FileSpreadsheet,
+  LogOut
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import RaizoLogo from "./RaizoLogo";
 
 interface NavbarProps {
   onOpenActivity?: () => void;
@@ -29,59 +30,39 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenActivity }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
   const navLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: Compass },
-    { href: "/skills", label: "My Skills", icon: Layers },
-    { href: "/gaps", label: "Skill Gaps", icon: BarChart3 },
-    { href: "/roadmap", label: "Learning Path", icon: GitBranch },
-    { href: "/learn", label: "Today's Plan", icon: BookOpen },
-    { href: "/tutor", label: "Raizo Tutor", icon: MessageSquare },
+    { href: "/dashboard", label: "Home", icon: Compass },
+    { href: "/assessment", label: "Assess", icon: FileCheck2 },
+    { href: "/learn", label: "Learn", icon: BookOpen },
+    { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet },
     { href: "/practice", label: "Practice", icon: Sparkles },
-    { href: "/assessment", label: "Assessments", icon: FileCheck2 },
-    { href: "/evidence", label: "Evidence", icon: CheckCircle2 },
-    { href: "/projects", label: "Projects", icon: Award },
-    { href: "/job-analysis", label: "Job Match", icon: Search },
-    { href: "/reports", label: "Reports", icon: Activity },
+    { href: "/skills", label: "Verified Skills", icon: CheckCircle2 },
+    { href: "/job-analysis", label: "Career Intelligence", icon: Briefcase },
+    { href: "/resume", label: "Resume", icon: FileText },
+    { href: "/reports", label: "Progress", icon: BarChart3 },
+    { href: "/projects", label: "Projects", icon: Layers },
+    { href: "/certificate", label: "Certificates", icon: Award }
   ];
 
-  const handleResetDemo = async () => {
-    try {
-      setIsResetting(true);
-      await api.resetDemo();
-      window.location.href = "/dashboard";
-    } catch (err) {
-      console.error("Demo reset error:", err);
-    } finally {
-      setIsResetting(false);
+  const getInitials = (name?: string) => {
+    if (!name) return "AR";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
     }
+    return name.slice(0, 2).toUpperCase();
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#080c14]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-[#27303B] bg-[#11161D]/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <div className="flex items-center space-x-3">
-          <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/25 transition-transform group-hover:scale-105">
-              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#090d16]">
-                <Brain className="h-5 w-5 text-cyan-400" />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-                RAIZO
-                <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-300 border border-indigo-500/30">
-                  AGENTIC
-                </span>
-              </span>
-              <span className="text-[10px] text-slate-400 tracking-wider">
-                By Badal Kumar Sahu
-              </span>
-            </div>
-          </Link>
+          <RaizoLogo size={28} />
         </div>
 
         {/* Desktop Navigation Links */}
@@ -93,13 +74,13 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 shadow-sm shadow-indigo-500/10"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    ? "bg-[#5B8DEF]/12 text-[#5B8DEF] font-semibold border border-[#5B8DEF]/30"
+                    : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-indigo-400" : "text-slate-400"}`} />
+                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#5B8DEF]" : "text-[#7E8996]"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -107,48 +88,74 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
         </nav>
 
         {/* Right Action Tools */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-3">
           {/* Agent Activity Drawer Trigger */}
           {onOpenActivity && (
             <button
               onClick={onOpenActivity}
-              className="flex items-center space-x-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/40 px-3 py-1.5 text-xs font-medium text-cyan-300 transition-all hover:bg-cyan-900/50 hover:border-cyan-400 shadow-sm shadow-cyan-950"
+              className="flex items-center space-x-1.5 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#5B8DEF] transition-all hover:bg-[#1A212B] hover:border-[#5B8DEF]/40 cursor-pointer"
               title="Inspect real-time agent audit logs"
             >
-              <Activity className="h-3.5 w-3.5 animate-pulse text-cyan-400" />
+              <Activity className="h-3.5 w-3.5 animate-pulse text-[#5B8DEF]" />
               <span className="hidden sm:inline">Agent Activity</span>
             </button>
           )}
 
-          {/* Quick Demo Reset for Judges */}
-          <button
-            onClick={handleResetDemo}
-            disabled={isResetting}
-            className="flex items-center space-x-1.5 rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
-            title="Reset demo data to canonical Alex Rivera Data Analyst state"
-          >
-            <RotateCcw className={`h-3.5 w-3.5 ${isResetting ? "animate-spin" : ""}`} />
-            <span className="hidden md:inline">Reset Demo</span>
-          </button>
+          {/* Learner Profile & Auth Controls */}
+          {isAuthenticated && user ? (
+            <div className="flex items-center space-x-2">
+              <Link
+                href="/profile"
+                className="flex items-center space-x-2.5 rounded-xl border border-[#27303B] bg-[#151B23] px-3 py-1.5 hover:border-[#5B8DEF]/50 transition-all group"
+                title="Learner Profile & Settings"
+              >
+                <div className="h-7 w-7 rounded-full bg-[#5B8DEF] flex items-center justify-center text-[11px] font-bold text-white shadow-xs">
+                  {getInitials(user?.name)}
+                </div>
 
-          {/* User Badge */}
-          <Link
-            href="/profile"
-            className="flex items-center space-x-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 hover:border-indigo-500/40 transition-all"
-          >
-            <div className="h-6 w-6 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white">
-              AR
+                <div className="hidden lg:flex flex-col text-left">
+                  <span className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#5B8DEF] transition-colors">
+                    {user?.name || "Alex Rivera"}
+                  </span>
+                  <span className="text-[10px] text-[#5B8DEF] font-medium">
+                    {user?.target_role === "data_analyst" ? "Data Analyst Track" : "Analytics Pathway"}
+                  </span>
+                </div>
+              </Link>
+
+              {/* Sign Out Button */}
+              <button
+                onClick={async () => {
+                  await logout();
+                  router.push("/login");
+                }}
+                className="rounded-lg p-2 text-[#7E8996] hover:text-[#E86A6A] hover:bg-[#E86A6A]/10 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
-            <div className="hidden sm:flex flex-col text-left">
-              <span className="text-xs font-medium text-slate-200 leading-tight">Alex Rivera</span>
-              <span className="text-[10px] text-cyan-400 font-semibold leading-tight">Data Analyst</span>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Link
+                href="/login"
+                className="rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] active:bg-[#4779D8] px-3 py-1.5 text-xs font-bold text-white transition-colors"
+              >
+                Sign Up
+              </Link>
             </div>
-          </Link>
+          )}
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-white"
+            className="xl:hidden rounded-lg p-2 text-[#7E8996] hover:bg-[#1A212B] hover:text-[#F5F7FA] cursor-pointer"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -157,7 +164,7 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-b border-white/10 bg-[#0c1220] px-4 py-3 space-y-1">
+        <div className="xl:hidden border-b border-[#27303B] bg-[#11161D] px-4 py-3 space-y-1">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -168,8 +175,8 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium ${
                   isActive
-                    ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/40"
-                    : "text-slate-300 hover:bg-white/5"
+                    ? "bg-[#5B8DEF]/12 text-[#5B8DEF] font-semibold border border-[#5B8DEF]/30"
+                    : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
                 }`}
               >
                 <Icon className="h-4 w-4" />

@@ -23,12 +23,13 @@ def seed_demo_environment():
     # 1. Seed User: Alex Rivera
     cursor.execute("""
     INSERT OR REPLACE INTO users (
-        id, email, name, current_role, target_role, career_goal, timeline_months, weekly_hours, settings_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, email, name, auth_token, is_google_verified, current_role, target_role, career_goal, timeline_months, weekly_hours, settings_json, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         DEMO_USER_ID,
         "alex.rivera@example.com",
         "Alex Rivera",
+        "demo_token_alex",
         "Marketing & Operations Associate",
         "data_analyst",
         "Transition into a High-Growth Data Analyst role within 4 months",

@@ -1,0 +1,16 @@
+Morgan Vance
+morgan.vance@example.com | (415) 555-0199
+San Francisco, CA | linkedin.com/in/morgan-vance
+
+Summary:
+Data Analyst with 4 years of experience querying large relational databases with SQL,
+cleaning messy tabular records using Python and Pandas, and building executive dashboards in Tableau.
+
+Experience:
+Data Analyst at Vertex Analytics (2022 - Present)
+- Authored complex SQL JOINs, CTEs, and window functions over customer purchase history.
+- Developed automated Python ETL pipelines to impute missing values and clean survey metrics.
+- Built Power BI dashboards tracking monthly active users and revenue churn.
+
+Education:
+Bachelor of Science in Mathematics and Statistics, State University (2018 - 2022)

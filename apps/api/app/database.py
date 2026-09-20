@@ -25,6 +25,8 @@ def init_db():
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
         name TEXT NOT NULL,
+        password_hash TEXT,
+        auth_token TEXT,
         current_role TEXT,
         target_role TEXT DEFAULT 'data_analyst',
         career_goal TEXT,
@@ -35,9 +37,28 @@ def init_db():
         updated_at TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS documents (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        doc_type TEXT NOT NULL,
+        original_filename TEXT NOT NULL,
+        stored_filename TEXT NOT NULL,
+        mime_type TEXT NOT NULL,
+        extension TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        sha256 TEXT NOT NULL,
+        storage_path TEXT NOT NULL,
+        uploaded_at TEXT NOT NULL,
+        processing_status TEXT NOT NULL,
+        processing_error TEXT,
+        extracted_json TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS resumes (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
+        document_id TEXT,
         filename TEXT NOT NULL,
         file_size INTEGER,
         file_type TEXT,
@@ -132,6 +153,20 @@ def init_db():
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS job_applications (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        job_id TEXT,
+        company TEXT NOT NULL,
+        job_title TEXT NOT NULL,
+        fit_score INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'Saved',
+        notes TEXT DEFAULT '',
+        updated_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -165,12 +200,57 @@ def init_db():
         agent TEXT NOT NULL,
         action TEXT NOT NULL,
         input_ref TEXT,
-        output_ref TEXT,
-        status TEXT NOT NULL,
-        duration_ms REAL,
-        details_json TEXT DEFAULT '{}'
+        output_ref TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS certificates (
+        id TEXT PRIMARY KEY,
+        certificate_id TEXT NOT NULL UNIQUE,
+        user_id TEXT NOT NULL,
+        assessment_id TEXT,
+        learning_path_id TEXT NOT NULL,
+        learner_name TEXT NOT NULL,
+        target_role TEXT NOT NULL,
+        achievement_title TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        completion_date TEXT NOT NULL,
+        issued_at TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'valid',
+        verification_hash TEXT NOT NULL,
+        verification_url TEXT NOT NULL,
+        pdf_path TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_certificates_user_id ON certificates(user_id);
+    CREATE INDEX IF NOT EXISTS idx_certificates_cert_id ON certificates(certificate_id);
     """)
+
+    conn.commit()
+
+    # Safe migrations for existing SQLite databases
+    user_columns = [r["name"] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
+    if "password_hash" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN password_hash TEXT;")
+    if "auth_token" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN auth_token TEXT;")
+    if "google_id" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN google_id TEXT;")
+    if "picture" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN picture TEXT;")
+    if "auth_provider" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'google';")
+    if "is_google_verified" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_google_verified INTEGER DEFAULT 1;")
+    if "token_expires_at" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN token_expires_at TEXT;")
+    if "last_login_at" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT;")
+
+    resume_columns = [r["name"] for r in cursor.execute("PRAGMA table_info(resumes)").fetchall()]
+    if "document_id" not in resume_columns:
+        cursor.execute("ALTER TABLE resumes ADD COLUMN document_id TEXT;")
 
     conn.commit()
     conn.close()

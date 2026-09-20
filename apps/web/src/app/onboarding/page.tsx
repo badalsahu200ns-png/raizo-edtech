@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,12 +14,20 @@ import {
   AlertCircle
 } from "lucide-react";
 import ResumeDropzone from "@/components/ResumeDropzone";
+import ExtractedProfileReview from "@/components/ExtractedProfileReview";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Resume Document Review State
+  const [uploadedDocumentId, setUploadedDocumentId] = useState<string | null>(null);
+  const [extractedProfile, setExtractedProfile] = useState<any | null>(null);
+  const [isReviewing, setIsReviewing] = useState<boolean>(false);
 
   // Step 1 State: Basic Profile
   const [name, setName] = useState("Alex Rivera");
@@ -45,7 +53,11 @@ export default function OnboardingPage() {
 
   const [customSkillInput, setCustomSkillInput] = useState("");
 
-  const handleProfileExtracted = (parsedProfile: any) => {
+  const handleProfileExtracted = (parsedProfile: any, docId: string) => {
+    setUploadedDocumentId(docId);
+    setExtractedProfile(parsedProfile);
+    setIsReviewing(true);
+
     if (parsedProfile.name) setName(parsedProfile.name);
     if (parsedProfile.current_role) setCurrentRole(parsedProfile.current_role);
     if (parsedProfile.years_experience_total) setYearsExperience(parsedProfile.years_experience_total);
@@ -63,6 +75,24 @@ export default function OnboardingPage() {
       }));
       setSelectedSkills(newSkills);
     }
+  };
+
+  const handleConfirmedReview = (confirmedData: any) => {
+    if (confirmedData.name) setName(confirmedData.name);
+    if (confirmedData.current_role) setCurrentRole(confirmedData.current_role);
+    if (confirmedData.target_role) setTargetRole(confirmedData.target_role);
+    if (confirmedData.skills) {
+      setSelectedSkills(
+        confirmedData.skills.map((s: any) => ({
+          skill_id: s.skill_id,
+          title: s.name || s.title,
+          category: s.category,
+          level: s.claimed_level || "Intermediate"
+        }))
+      );
+    }
+    setIsReviewing(false);
+    setStep(2); // Automatically advance to Step 2
   };
 
   const addCustomSkill = () => {
@@ -88,8 +118,8 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
     try {
       await api.completeOnboarding({
-        user_id: "demo_learner_alex",
-        name,
+        user_id: user?.id,
+        name: name || user?.name || "Verified Learner",
         current_role: currentRole,
         years_experience: yearsExperience,
         education,
@@ -103,7 +133,7 @@ export default function OnboardingPage() {
       });
 
       // Generate customized roadmap DAG
-      await api.generateRoadmap("demo_learner_alex", targetRole);
+      await api.generateRoadmap(user?.id, targetRole);
       router.push("/dashboard");
     } catch (err) {
       console.error("Onboarding error:", err);
@@ -146,7 +176,7 @@ export default function OnboardingPage() {
                     ? "border-indigo-500 bg-indigo-950/50 text-indigo-300 shadow-md shadow-indigo-950"
                     : isCompleted
                     ? "border-emerald-500/40 bg-emerald-950/20 text-emerald-400"
-                    : "border-white/10 bg-white/5 text-slate-400 hover:text-slate-200"
+                    : "border-white/10 bg-[#151B23]/5 text-slate-400 hover:text-slate-200"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -159,16 +189,39 @@ export default function OnboardingPage() {
 
       {/* STEP 1: Basic Profile & Resume Upload */}
       {step === 1 && (
-        <div className="rounded-3xl border border-white/10 bg-[#0d1424] p-8 space-y-6 shadow-2xl">
-          <div className="border-b border-white/10 pb-4">
-            <h2 className="text-xl font-bold text-white">Step 1: Background & Resume Upload</h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Upload your resume for automatic capability extraction, or verify your background details manually.
-            </p>
+        <div className="rounded-3xl border border-white/10 bg-[#0d1424] p-6 sm:p-8 space-y-6 shadow-2xl">
+          <div className="border-b border-white/10 pb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white">
+                {isReviewing ? "Step 1: Review Extracted Profile Claims" : "Step 1: Background & Resume Upload"}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                {isReviewing
+                  ? "Carefully review and edit extracted capabilities. Claims are registered as Unverified."
+                  : "Upload your resume for automatic capability extraction, or configure your background manually."}
+              </p>
+            </div>
+            {isReviewing && (
+              <button
+                onClick={() => setIsReviewing(false)}
+                className="text-xs text-slate-400 hover:text-white transition-colors"
+              >
+                Upload Different File
+              </button>
+            )}
           </div>
 
-          {/* Resume Upload Component */}
-          <ResumeDropzone onProfileExtracted={handleProfileExtracted} />
+          {isReviewing && extractedProfile && uploadedDocumentId ? (
+            <ExtractedProfileReview
+              documentId={uploadedDocumentId}
+              initialProfile={extractedProfile}
+              onConfirmed={handleConfirmedReview}
+              onCancel={() => setIsReviewing(false)}
+            />
+          ) : (
+            <>
+              {/* Resume Upload Component */}
+              <ResumeDropzone onProfileExtracted={handleProfileExtracted} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div>
@@ -177,7 +230,7 @@ export default function OnboardingPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -186,7 +239,7 @@ export default function OnboardingPage() {
                 type="text"
                 value={currentRole}
                 onChange={(e) => setCurrentRole(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -196,7 +249,7 @@ export default function OnboardingPage() {
                 step="0.5"
                 value={yearsExperience}
                 onChange={(e) => setYearsExperience(parseFloat(e.target.value) || 0)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -205,7 +258,7 @@ export default function OnboardingPage() {
                 type="text"
                 value={education}
                 onChange={(e) => setEducation(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -214,7 +267,7 @@ export default function OnboardingPage() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -223,22 +276,24 @@ export default function OnboardingPage() {
                 type="text"
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
-            <button
-              onClick={() => setStep(2)}
-              className="flex items-center space-x-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-colors"
-            >
-              <span>Next: Target Goal</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={() => setStep(2)}
+                className="flex items-center space-x-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-colors"
+              >
+                <span>Next: Target Goal</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    )}
 
       {/* STEP 2: Career Goal & Availability */}
       {step === 2 && (
@@ -273,7 +328,7 @@ export default function OnboardingPage() {
                 rows={3}
                 value={careerGoal}
                 onChange={(e) => setCareerGoal(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none leading-relaxed"
+                className="w-full rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none leading-relaxed"
               />
             </div>
 
@@ -322,7 +377,7 @@ export default function OnboardingPage() {
           <div className="flex justify-between pt-4">
             <button
               onClick={() => setStep(1)}
-              className="flex items-center space-x-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-white/10"
+              className="flex items-center space-x-2 rounded-xl border border-white/10 bg-[#151B23]/5 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-[#151B23]/10"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back</span>
@@ -361,7 +416,7 @@ export default function OnboardingPage() {
               value={customSkillInput}
               onChange={(e) => setCustomSkillInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCustomSkill()}
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+              className="flex-1 rounded-xl border border-white/10 bg-[#151B23]/5 px-3.5 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
             />
             <button
               onClick={addCustomSkill}
@@ -421,7 +476,7 @@ export default function OnboardingPage() {
           <div className="flex justify-between pt-4">
             <button
               onClick={() => setStep(2)}
-              className="flex items-center space-x-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-white/10"
+              className="flex items-center space-x-2 rounded-xl border border-white/10 bg-[#151B23]/5 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-[#151B23]/10"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back</span>
