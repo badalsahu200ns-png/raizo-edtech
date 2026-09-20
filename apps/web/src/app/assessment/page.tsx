@@ -24,7 +24,10 @@ import {
   ExternalLink,
   BookOpen,
   Target,
-  Layers
+  Layers,
+  ClipboardCheck,
+  Lightbulb,
+  UserCog
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -41,6 +44,10 @@ function AssessmentInner() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Assessment | RAIZO";
+  }, []);
 
   // Screen States: "landing" | "active" | "submitting" | "results"
   const [screenState, setScreenState] = useState<"landing" | "active" | "results">("landing");
@@ -352,11 +359,11 @@ function AssessmentInner() {
         <div className="border-b border-[#27303B] pb-5 space-y-2">
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DEF] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full font-bold">
-              [01 — ASSESS]
+              [01 — ASSESSMENT]
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-            Skill Assessments
+            Assessment
           </h1>
           <p className="text-xs sm:text-sm font-medium text-[#B4BDC8]">
             Measure your current ability and identify what to improve next.
@@ -364,13 +371,22 @@ function AssessmentInner() {
           <div className="border-l-2 border-[#5B8DEF]/40 pl-3 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
             “You cannot improve what you cannot see.”
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold text-[#B4BDC8] pt-1" aria-label="Assessment progression">
             <span className="text-[10px] font-bold uppercase text-[#7E8996]">Progression:</span>
-            <span className="text-[#F5F7FA] font-bold">ASSESS</span>
-            <span className="text-[#CBD2CB]">?</span>
-            <span className="text-[#5B8DEF] font-bold">UNDERSTAND</span>
-            <span className="text-[#CBD2CB]">?</span>
-            <span className="text-[#F5F7FA] font-bold">PERSONALIZE</span>
+            <span className="inline-flex items-center gap-1.5 text-[#F5F7FA] font-bold">
+              <ClipboardCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>ASSESS</span>
+            </span>
+            <span className="text-[#7E8996]" aria-hidden="true">•</span>
+            <span className="inline-flex items-center gap-1.5 text-[#5B8DEF] font-bold">
+              <Lightbulb className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>UNDERSTAND</span>
+            </span>
+            <span className="text-[#7E8996]" aria-hidden="true">•</span>
+            <span className="inline-flex items-center gap-1.5 text-[#F5F7FA] font-bold">
+              <UserCog className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>PERSONALIZE</span>
+            </span>
           </div>
         </div>
 

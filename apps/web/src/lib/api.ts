@@ -8,7 +8,6 @@ import {
   EvaluationResult,
   TutorMessage,
   AuditLogEntry,
-  GoogleAuthResponse,
   Certificate,
   CertificateEligibility,
   JobListing,
@@ -21,7 +20,7 @@ export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:800
 
 function getAuthHeader(): Record<string, string> {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("raizo_token");
+    const token = null;
     if (token) {
       return { Authorization: `Bearer ${token}` };
     }
@@ -52,21 +51,6 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 }
 
 export const api = {
-  // Google Authentication Only
-  googleAuth: (credential: string) =>
-    fetchAPI<GoogleAuthResponse>("/auth/google", {
-      method: "POST",
-      body: JSON.stringify({ credential })
-    }),
-
-  logout: () =>
-    fetchAPI<{ success: boolean; message: string }>("/auth/logout", {
-      method: "POST"
-    }),
-
-  getMe: () =>
-    fetchAPI<{ authenticated?: boolean; user: UserProfile | null; is_demo?: boolean }>("/auth/me"),
-
   // Profile & Resume Lifecycle
   uploadResumeFile: async (file: File) => {
     const formData = new FormData();

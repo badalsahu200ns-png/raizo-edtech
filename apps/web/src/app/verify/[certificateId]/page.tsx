@@ -139,7 +139,7 @@ export default function VerifyCertificatePage() {
                 Recipient Name
               </span>
               <p className="text-base font-bold text-[#F5F7FA]">{certData.recipient_name}</p>
-              <p className="text-[11px] text-[#36C98F] font-medium">✓ Verified Identity via Google OAuth</p>
+              <p className="text-[11px] text-[#36C98F] font-medium">✓ Certificate identity verified</p>
             </div>
 
             <div className="rounded-xl border border-[#27303B] bg-[#11161D] p-4 space-y-1">

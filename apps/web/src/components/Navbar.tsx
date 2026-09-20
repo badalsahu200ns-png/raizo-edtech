@@ -17,10 +17,8 @@ import {
   X,
   Briefcase,
   FileText,
-  FileSpreadsheet,
-  LogOut
+  FileSpreadsheet
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import RaizoLogo from "./RaizoLogo";
 
@@ -30,13 +28,12 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenActivity }: NavbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { href: "/dashboard", label: "Home", icon: Compass },
-    { href: "/assessment", label: "Assess", icon: FileCheck2 },
+    { href: "/assessment", label: "Assessment", icon: FileCheck2 },
     { href: "/learn", label: "Learn", icon: BookOpen },
     { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet },
     { href: "/practice", label: "Practice", icon: Sparkles },
@@ -102,7 +99,7 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
           )}
 
           {/* Learner Profile & Auth Controls */}
-          {isAuthenticated && user ? (
+          {user ? (
             <div className="flex items-center space-x-2">
               <Link
                 href="/profile"
@@ -123,34 +120,8 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
                 </div>
               </Link>
 
-              {/* Sign Out Button */}
-              <button
-                onClick={async () => {
-                  await logout();
-                  router.push("/login");
-                }}
-                className="rounded-lg p-2 text-[#7E8996] hover:text-[#E86A6A] hover:bg-[#E86A6A]/10 transition-colors cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <Link
-                href="/login"
-                className="rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] active:bg-[#4779D8] px-3 py-1.5 text-xs font-bold text-white transition-colors"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
+          ) : null}
 
           {/* Mobile Menu Button */}
           <button

@@ -9,6 +9,7 @@ declare module 'lucide-react' {
   export const Award: React.FC<any>;
   export const FileCheck: React.FC<any>;
   export const FileCheck2: React.FC<any>;
+  export const ClipboardCheck: React.FC<any>;
   export const BarChart3: React.FC<any>;
   export const Search: React.FC<any>;
   export const CheckCircle2: React.FC<any>;
@@ -68,6 +69,7 @@ declare module 'lucide-react' {
   export const Settings: React.FC<any>;
   export const Download: React.FC<any>;
   export const UserCheck: React.FC<any>;
+  export const UserCog: React.FC<any>;
   export const LogOut: React.FC<any>;
   export const Copy: React.FC<any>;
   export const Check: React.FC<any>;

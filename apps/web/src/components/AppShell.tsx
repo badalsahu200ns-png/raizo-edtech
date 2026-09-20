@@ -13,19 +13,15 @@ import {
   CheckCircle2,
   Award,
   Activity,
-  User,
   Settings,
   Menu,
   X,
   Mail,
-  ChevronRight,
   Briefcase,
   FileText,
   FileSpreadsheet,
-  LogOut,
-  ChevronDown
+  ChevronRight
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import RaizoLogo from "./RaizoLogo";
 import ContactModal from "./ContactModal";
 import Footer from "./Footer";
@@ -41,7 +37,7 @@ interface NavItem {
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: Compass },
-  { href: "/assessment", label: "Assess", icon: FileCheck2 },
+  { href: "/assessment", label: "Assessment", icon: FileCheck2 },
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet, badge: "Lab" },
   { href: "/practice", label: "Practice", icon: Sparkles },
@@ -55,12 +51,10 @@ const PRIMARY_NAV: NavItem[] = [
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user } = useAuth();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [activityDrawerOpen, setActivityDrawerOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // If on landing page "/", don't show full internal app sidebar, but keep clean top/footer
   const isLanding = pathname === "/";
@@ -125,13 +119,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span>Contact</span>
             </button>
 
-            {/* Authenticated User Menu or Sign In / Sign Up Buttons */}
-            {isAuthenticated && user ? (
+            {user ? (
               <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center space-x-2 rounded-lg border border-[#27303B] bg-[#151B23] px-2.5 py-1.5 hover:border-[#5B8DEF]/50 transition-all group cursor-pointer"
-                  title="Learner Account Menu"
+                <Link
+                  href="/profile"
+                  className="flex items-center space-x-2 rounded-lg border border-[#27303B] bg-[#151B23] px-2.5 py-1.5 hover:border-[#5B8DEF]/50 transition-all group"
+                  title="Learner Profile"
                 >
                   <div className="h-6 w-6 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-[10px] font-bold">
                     {getInitials(user?.name)}
@@ -139,66 +132,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <span className="text-xs font-semibold text-[#F5F7FA] hidden lg:inline group-hover:text-[#5B8DEF] transition-colors">
                     {user?.name || "Alex Rivera"}
                   </span>
-                  <ChevronDown className="h-3 w-3 text-[#7E8996] group-hover:text-[#F5F7FA]" />
-                </button>
-
-                {userMenuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setUserMenuOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#27303B] bg-[#151B23] p-2 shadow-2xl z-50 animate-in fade-in">
-                      <div className="px-3 py-2 border-b border-[#27303B] mb-1">
-                        <p className="text-xs font-bold text-[#F5F7FA] truncate">{user?.name}</p>
-                        <p className="text-[11px] text-[#B4BDC8] truncate">{user?.email}</p>
-                        <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-wider text-[#36C98F] bg-[#36C98F]/10 border border-[#36C98F]/20 px-1.5 py-0.5 rounded">
-                          ✓ Google Verified
-                        </span>
-                      </div>
-
-                      <Link
-                        href="/profile"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#F5F7FA] hover:bg-[#1A212B] rounded-lg transition-colors"
-                      >
-                        <Settings className="h-3.5 w-3.5 text-[#7E8996]" />
-                        <span>Profile & Settings</span>
-                      </Link>
-
-                      <button
-                        onClick={async () => {
-                          setUserMenuOpen(false);
-                          await logout();
-                          router.push("/login");
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#E86A6A] hover:bg-[#E86A6A]/10 rounded-lg transition-colors text-left mt-1 border-t border-[#27303B] pt-2 cursor-pointer"
-                      >
-                        <LogOut className="h-3.5 w-3.5" />
-                        <span>Sign Out</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center space-x-1.5 rounded-lg border border-[#27303B] bg-[#151B23] px-3 py-1.5 text-xs font-semibold text-[#F5F7FA] hover:bg-[#1A212B] transition-colors"
-                >
-                  <User className="h-3.5 w-3.5 text-[#7E8996]" />
-                  <span>Sign In</span>
-                </Link>
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center space-x-1.5 rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] active:bg-[#4779D8] text-white px-3 py-1.5 text-xs font-bold transition-colors shadow-xs"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Sign Up</span>
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -338,7 +274,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="pt-4 border-t border-[#27303B] space-y-3">
-              {isAuthenticated && user ? (
+              {user && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-3 px-1">
                     <div className="h-8 w-8 rounded-full bg-[#5B8DEF] text-white flex items-center justify-center text-xs font-bold shrink-0">
@@ -359,36 +295,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <span>Profile & Settings</span>
                   </Link>
 
-                  <button
-                    onClick={async () => {
-                      setMobileDrawerOpen(false);
-                      await logout();
-                      router.push("/login");
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#E86A6A]/10 border border-[#E86A6A]/30 text-xs font-bold text-[#E86A6A] hover:bg-[#E86A6A]/20 transition-colors"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-[#27303B] bg-[#151B23] text-xs font-semibold text-[#F5F7FA] hover:bg-[#1A212B]"
-                  >
-                    <User className="h-3.5 w-3.5 text-[#7E8996]" />
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#5B8DEF] hover:bg-[#719DF5] text-white text-xs font-bold shadow-sm"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Sign Up with Google</span>
-                  </Link>
                 </div>
               )}
 

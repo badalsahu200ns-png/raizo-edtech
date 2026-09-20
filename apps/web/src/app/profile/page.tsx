@@ -17,16 +17,13 @@ import {
   Award,
   BookOpen,
   UserCheck,
-  LogOut,
   Lock
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [name, setName] = useState("Alex Rivera");
   const [currentRole, setCurrentRole] = useState("Junior Business Analyst");
@@ -388,10 +385,10 @@ export default function ProfilePage() {
             </span>
           </div>
           <h3 className="text-lg font-bold text-[#F5F7FA]">
-            Connected Google Identity
+            Learner Profile
           </h3>
           <p className="text-xs text-[#B4BDC8]">
-            Your session is authenticated via official Google OAuth with cryptographic token validation.
+            RAIZO keeps your learner profile available throughout this workspace.
           </p>
         </div>
 
@@ -401,26 +398,12 @@ export default function ProfilePage() {
               <span className="text-xs font-bold text-[#F5F7FA]">
                 {authUser?.email || user?.email || "alex.rivera@example.com"}
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#36C98F] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full border border-[#2F7D5C]/30">
-                <CheckCircle2 className="h-3 w-3" />
-                Google Verified
-              </span>
             </div>
             <p className="text-[11px] text-[#B4BDC8]">
               Learner ID: <span className="font-mono">{authUser?.id || user?.id || "demo_learner_alex"}</span>
             </p>
           </div>
 
-          <button
-            onClick={async () => {
-              await logout();
-              router.push("/login");
-            }}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#E86A6A]/10 border border-[#E86A6A]/30 text-xs font-bold text-[#E86A6A] hover:bg-[#FBE8E6] transition-colors self-start sm:self-auto cursor-pointer"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out of RAIZO</span>
-          </button>
         </div>
       </div>
     </div>
