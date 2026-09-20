@@ -94,7 +94,7 @@ export default function ProfilePage() {
         mentor_name: mentorName,
         reason: overrideReason
       });
-      setOverrideStatus("? Mentor Verified: Assessment recorded to your skill profile!");
+      setOverrideStatus("✓ Mentor Verified: Assessment recorded to your skill profile!");
       setTimeout(() => setOverrideStatus(null), 5000);
     } catch (err) {
       console.error("Mentor review error:", err);
@@ -106,15 +106,17 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-10 py-6">
       {/* Header - Answers: "Who am I in this system, and what are my goals?" */}
-      <div className="border-b border-[#27303B] pb-6 space-y-2">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
-          LEARNER IDENTITY & PREFERENCES
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-          Profile
+      <div className="raizo-page-header">
+        <div className="raizo-page-eyebrow">
+          <span>LEARNER IDENTITY</span>
+          <span>•</span>
+          <span>SYSTEM PREFERENCES</span>
+        </div>
+        <h1 className="raizo-page-title">
+          Learner Profile & Calibration
         </h1>
-        <p className="text-sm text-[#B4BDC8] max-w-2xl leading-relaxed">
-          Manage your career goals, learning preferences, and professional information.
+        <p className="raizo-page-desc">
+          Manage your career target, baseline credentials, and AI tutor personalization settings.
         </p>
       </div>
 
@@ -407,7 +409,7 @@ export default function ProfilePage() {
               </span>
             </div>
             <p className="text-[11px] text-[#B4BDC8]">
-              Learner ID: <span className="font-mono">{authUser?.id || user?.id || "demo_learner_alex"}</span>
+              Learner ID: <span className="font-mono">{authUser?.id || user?.id || "—"}</span>
             </p>
           </div>
 

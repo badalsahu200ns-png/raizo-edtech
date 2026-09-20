@@ -24,7 +24,9 @@ import {
   ExternalLink,
   BookOpen,
   Target,
-  Layers
+  Layers,
+  Search,
+  FileText
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -348,29 +350,49 @@ function AssessmentInner() {
 
     return (
       <div className="max-w-5xl mx-auto space-y-8 py-6 px-4">
-        {/* 1. HEADER (Section 5) */}
-        <div className="border-b border-[#27303B] pb-5 space-y-2">
-          <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DEF] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full font-bold">
-              [01 — ASSESS]
+        {/* 1. UNIFIED PAGE HEADER */}
+        <div className="raizo-page-header">
+          <div className="space-y-1.5">
+            <span className="raizo-page-eyebrow">
+              <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+              DIAGNOSTIC BENCHMARKING
             </span>
+            <h1 className="raizo-page-title flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="inline-flex items-center gap-2 text-[#5B8DEF]">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+                <span>ASSESSMENT</span>
+              </span>
+              <span className="text-[#64748B] font-light">—</span>
+              <span className="inline-flex items-center gap-2 text-[#38BDF8]">
+                <Search className="h-5 w-5 sm:h-6 sm:w-6" />
+                <span>UNDERSTAND</span>
+              </span>
+              <span className="text-[#64748B] font-light">—</span>
+              <span className="inline-flex items-center gap-2 text-[#36C98F]">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
+                <span>PERSONALIZE</span>
+              </span>
+            </h1>
+            <p className="raizo-page-desc">
+              Measure your analytical capability against empirical industry benchmarks and identify what to improve next.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-            Skill Assessments
-          </h1>
-          <p className="text-xs sm:text-sm font-medium text-[#B4BDC8]">
-            Measure your current ability and identify what to improve next.
-          </p>
-          <div className="border-l-2 border-[#5B8DEF]/40 pl-3 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
-            “You cannot improve what you cannot see.”
-          </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
-            <span className="text-[10px] font-bold uppercase text-[#7E8996]">Progression:</span>
-            <span className="text-[#F5F7FA] font-bold">ASSESS</span>
-            <span className="text-[#CBD2CB]">?</span>
-            <span className="text-[#5B8DEF] font-bold">UNDERSTAND</span>
-            <span className="text-[#CBD2CB]">?</span>
-            <span className="text-[#F5F7FA] font-bold">PERSONALIZE</span>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setShowStartModal(true)}
+              className="raizo-btn-primary"
+            >
+              <FileCheck2 className="h-4 w-4" />
+              <span>Start Diagnostic (25m)</span>
+            </button>
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="raizo-btn-secondary"
+            >
+              <Award className="h-4 w-4 text-[#B4BDC8]" />
+              <span>Diagnostic History</span>
+            </button>
           </div>
         </div>
 
@@ -454,12 +476,12 @@ function AssessmentInner() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-sm text-[#F5F7FA]">Pandas Data Cleaning</h3>
-                  <span className="text-xs font-mono font-extrabold text-[#B67A22] bg-[#FBF4E8] px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-mono font-extrabold text-[#F2B84B] bg-[#F2B84B]/10 border border-[#F2B84B]/20 px-2.5 py-0.5 rounded-full">
                     50%
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-[#B67A22]">Developing</span>
+                  <span className="text-xs font-semibold text-[#F2B84B]">Developing</span>
                 </div>
                 <div className="text-xs text-[#B4BDC8] space-y-1 pt-2 border-t border-[#27303B]">
                   <span className="text-[10px] uppercase font-bold text-[#7E8996] block">Evidence</span>
@@ -498,8 +520,8 @@ function AssessmentInner() {
               </p>
             </div>
 
-            {/* Current Result prominent card (Section 6: Current Result: 88% Qualified) */}
-            <div className="rounded-xl border border-[#2F7D5C]/30 bg-[#F4FAF6] p-4 text-right shrink-0">
+            {/* Current Result prominent card */}
+            <div className="rounded-xl border border-[#36C98F]/30 bg-[#11161D] p-4 text-right shrink-0">
               <span className="text-[10px] font-bold uppercase text-[#7E8996] block">Target Role</span>
               <span className="font-extrabold text-sm text-[#F5F7FA] block">Data Analyst</span>
               <div className="flex items-baseline justify-end gap-2 mt-1">
@@ -526,7 +548,7 @@ function AssessmentInner() {
                     <th className="p-3 text-right">Result</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#DDE1DD]">
+                <tbody className="divide-y divide-[#27303B]">
                   {[
                     { skill: "SQL", result: 88 },
                     { skill: "Excel", result: 85 },
@@ -534,7 +556,7 @@ function AssessmentInner() {
                     { skill: "Statistics", result: 80 },
                     { skill: "Data Visualization", result: 90 }
                   ].map((row) => (
-                    <tr key={row.skill} className="hover:bg-[#FAF9F5]">
+                    <tr key={row.skill} className="hover:bg-[#18202A] transition-colors">
                       <td className="p-3 font-semibold text-[#F5F7FA]">{row.skill}</td>
                       <td className="p-3 text-right font-mono font-bold text-[#5B8DEF]">{row.result}%</td>
                     </tr>
@@ -1039,7 +1061,7 @@ function AssessmentInner() {
             </label>
 
             <span className="text-[11px] text-[#B4BDC8]">
-              {answers[currentQ.id] ? "? Answer saved automatically" : "Select an option to save"}
+              {answers[currentQ.id] ? "✓ Answer saved automatically" : "Select an option to save"}
             </span>
           </div>
 

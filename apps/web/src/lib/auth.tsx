@@ -104,6 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginAsDemo = async (): Promise<void> => {
+    const isLocalDev =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        process.env.NODE_ENV === "development" ||
+        process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO === "true");
+
+    if (!isLocalDev) {
+      throw new Error("Demo accounts are strictly disabled in production builds and deployments.");
+    }
     await loginWithGoogle("test_google:alex.rivera@example.com:Alex Rivera:demo_learner_alex:");
   };
 

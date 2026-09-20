@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -48,28 +48,25 @@ export default function ReportsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-4">
       {/* Header */}
-      <div className="border-b border-[#27303B] pb-6 space-y-2">
-        <div className="flex items-center space-x-2">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DEF] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full font-bold">
-            [06 — PROGRESS]
-          </span>
+      <div className="raizo-page-header">
+        <div className="raizo-page-eyebrow">
+          <span>PROGRESS METRICS</span>
+          <span>•</span>
+          <span>VERIFIED READINESS</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
+        <h1 className="raizo-page-title">
           Career Readiness Progression
         </h1>
-        <p className="text-xs sm:text-sm text-[#B4BDC8]">
+        <p className="raizo-page-desc">
           Generated on {report.generated_at || "September 2026"} for Alex Rivera • Target Role: Data Analyst
         </p>
-        <div className="border-l-2 border-[#5B8DEF]/40 pl-3 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
-          “Progress isn’t about knowing more. It’s about becoming more capable.”
-        </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
-          <span className="text-[10px] font-bold uppercase text-[#7E8996]">Timeline:</span>
-          <span className="text-[#B4BDC8] font-semibold">BEFORE (Initial Diagnostic: 58%)</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#5B8DEF] font-bold">CURRENT (Verified Evidence: 72%)</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#F5F7FA] font-bold">TARGET (Interview Ready: 85%+)</span>
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E8996]">Timeline:</span>
+          <span className="text-[#B4BDC8] font-medium">Diagnostic: 58%</span>
+          <span className="text-[#5B8DEF]">→</span>
+          <span className="text-[#5B8DEF] font-bold">Current Verified: 72%</span>
+          <span className="text-[#5B8DEF]">→</span>
+          <span className="text-[#36C98F] font-bold">Target Ready: 85%+</span>
         </div>
       </div>
 

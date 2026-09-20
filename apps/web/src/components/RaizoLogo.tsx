@@ -26,22 +26,22 @@ export function RaizoMark({ size = 28, className = "" }: { size?: number; classN
       aria-hidden="true"
     >
       <defs>
-        {/* Primary Blue Gradient */}
+        {/* Primary Azure Gradient */}
         <linearGradient id="raizo-blue-grad" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#5B8DEF" />
-          <stop offset="1" stopColor="#4779D8" />
+          <stop stopColor="#38BDF8" />
+          <stop offset="1" stopColor="#0284C7" />
         </linearGradient>
 
-        {/* Intelligence Indigo Accent */}
+        {/* Intelligence Cyan/Emerald Accent */}
         <linearGradient id="raizo-indigo-grad" x1="16" y1="8" x2="30" y2="24" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#A79CF7" />
-          <stop offset="1" stopColor="#7C6CF2" />
+          <stop stopColor="#38BDF8" />
+          <stop offset="1" stopColor="#10B981" />
         </linearGradient>
 
         {/* Subtle Amber Spark */}
         <linearGradient id="raizo-amber-grad" x1="20" y1="6" x2="28" y2="18" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#F2B84B" />
-          <stop offset="1" stopColor="#D9A441" />
+          <stop stopColor="#F59E0B" />
+          <stop offset="1" stopColor="#D97706" />
         </linearGradient>
       </defs>
 
@@ -57,7 +57,7 @@ export function RaizoMark({ size = 28, className = "" }: { size?: number; classN
       {/* Upper Loop: Modern Geometric Facet */}
       <path
         d="M13.5 6H20.5C24.366 6 27.5 9.13401 27.5 13C27.5 16.866 24.366 20 20.5 20H13.5V6Z"
-        fill="#5B8DEF"
+        fill="#0EA5E9"
       />
       {/* Inner Negative Space Cutout */}
       <path
@@ -78,7 +78,7 @@ export function RaizoMark({ size = 28, className = "" }: { size?: number; classN
       />
 
       {/* Verified Node Accent Pin */}
-      <circle cx="27.5" cy="13" r="1.75" fill="#36C98F" />
+      <circle cx="27.5" cy="13" r="1.75" fill="#10B981" />
       <circle cx="11.5" cy="8.5" r="1.5" fill="#F5F7FA" opacity="0.9" />
     </svg>
   );
@@ -102,10 +102,10 @@ export default function RaizoLogo({
       <RaizoMark size={size} />
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5 leading-none">
-          <span className="font-bold text-[16px] tracking-tight text-[#F5F7FA] group-hover:text-[#5B8DEF] transition-colors">
+          <span className="font-bold text-[16px] tracking-tight text-[#F5F7FA] group-hover:text-[#0EA5E9] transition-colors">
             RAIZO
           </span>
-          <span className="text-[9px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-[#5B8DEF]/10 text-[#5B8DEF] uppercase border border-[#5B8DEF]/20">
+          <span className="text-[9px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-[#0EA5E9]/10 text-[#0EA5E9] uppercase border border-[#0EA5E9]/20">
             INTELLIGENCE
           </span>
         </div>

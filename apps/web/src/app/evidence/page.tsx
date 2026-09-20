@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -51,35 +51,35 @@ export default function EvidenceLedgerPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 py-6">
-      {/* 1. Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#27303B] pb-6">
-        <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
-            VERIFIED EVIDENCE RECORDS
+      {/* 1. UNIFIED PAGE HEADER */}
+      <div className="raizo-page-header">
+        <div className="space-y-1.5">
+          <span className="raizo-page-eyebrow">
+            <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+            EVIDENCE LEDGER
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] mt-1">
-            Proof of what you can actually do.
+          <h1 className="raizo-page-title">
+            Verified Competency Records
           </h1>
-          <p className="text-xs sm:text-sm text-[#B4BDC8] mt-1 max-w-2xl leading-relaxed">
-            Every claimed and verified capability is supported by demonstrated records.
-            Scores reflect objective assessments rather than self-reported assumptions.
+          <p className="raizo-page-desc">
+            Every claimed and verified capability is supported by demonstrated records. Scores reflect objective assessments rather than self-reported assumptions.
           </p>
         </div>
 
-        {/* Search & Filter */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Search & Filter Dock */}
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="relative">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#7E8996]" />
             <input
               type="text"
-              placeholder="Search evidence records..."
+              placeholder="Search records..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-xl border border-[#27303B] bg-[#151B23] pl-9 pr-4 py-2 text-xs text-[#F5F7FA] focus:border-[#5B8DEF] focus:outline-none w-56 shadow-sm"
+              className="rounded-xl border border-[#27303B] bg-[#151B23] pl-9 pr-4 py-2 text-xs text-[#F5F7FA] focus:border-[#5B8DEF] focus:outline-none w-52 shadow-xs transition-colors"
             />
           </div>
 
-          <div className="flex rounded-xl border border-[#27303B] bg-[#151B23] p-1 text-xs shadow-sm">
+          <div className="flex rounded-xl border border-[#27303B] bg-[#151B23] p-1 text-xs shadow-xs">
             {[
               { key: "all", label: "All" },
               { key: "diagnostic", label: "Assessments" },
@@ -91,7 +91,7 @@ export default function EvidenceLedgerPage() {
                 onClick={() => setFilterType(t.key)}
                 className={`rounded-lg px-2.5 py-1 font-semibold capitalize transition-all ${
                   filterType === t.key
-                    ? "bg-[#5B8DEF] text-white shadow-sm"
+                    ? "bg-[#5B8DEF] text-white shadow-xs"
                     : "text-[#B4BDC8] hover:text-[#F5F7FA]"
                 }`}
               >

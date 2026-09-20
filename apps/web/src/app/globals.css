@@ -19,25 +19,25 @@
     --raizo-text-secondary: #B4BDC8;
     --raizo-text-muted: #7E8996;
 
-    --raizo-primary: #5B8DEF;
-    --raizo-primary-hover: #719DF5;
-    --raizo-primary-active: #4779D8;
+    --raizo-primary: #0EA5E9;
+    --raizo-primary-hover: #38BDF8;
+    --raizo-primary-active: #0284C7;
 
-    --raizo-accent: #7C6CF2;
-    --raizo-accent-soft: #A79CF7;
+    --raizo-accent: #0284C7;
+    --raizo-accent-soft: #38BDF8;
 
-    --raizo-success: #36C98F;
-    --raizo-warning: #F2B84B;
-    --raizo-danger: #E86A6A;
-    --raizo-info: #55B7E8;
+    --raizo-success: #10B981;
+    --raizo-warning: #F59E0B;
+    --raizo-danger: #EF4444;
+    --raizo-info: #38BDF8;
 
     /* Semantic Data Chart Palette */
-    --chart-1: #5B8DEF;
-    --chart-2: #7C6CF2;
-    --chart-3: #36C98F;
-    --chart-4: #F2B84B;
-    --chart-5: #55B7E8;
-    --chart-6: #E88C6A;
+    --chart-1: #0EA5E9;
+    --chart-2: #10B981;
+    --chart-3: #38BDF8;
+    --chart-4: #F59E0B;
+    --chart-5: #64748B;
+    --chart-6: #EF4444;
 
     /* Radii */
     --radius-sm: 6px;
@@ -177,7 +177,7 @@
   border: 1px solid var(--raizo-border);
   color: var(--raizo-text-primary);
   cursor: pointer;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 120ms ease;
 }
 .raizo-btn-secondary:hover:not(:disabled) {
   background-color: var(--raizo-surface-elevated);
@@ -186,6 +186,30 @@
 .raizo-btn-secondary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Tertiary / Ghost Button */
+.raizo-btn-tertiary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--raizo-text-secondary);
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+.raizo-btn-tertiary:hover:not(:disabled) {
+  color: var(--raizo-text-primary);
+  background-color: var(--raizo-surface);
+  border-color: var(--raizo-border);
 }
 
 /* Danger Button (Section 16) */
@@ -209,6 +233,93 @@
 .raizo-btn-danger:hover:not(:disabled) {
   background-color: rgba(232, 106, 106, 0.20);
   border-color: rgba(232, 106, 106, 0.35);
+}
+
+/* Docked Floating / Segmented Toolbars (Huddlekit style) */
+.raizo-dock-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background-color: rgba(21, 27, 35, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--raizo-border);
+  border-radius: 9999px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.raizo-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--raizo-text-secondary);
+  transition: all 160ms ease;
+}
+.raizo-dock-btn:hover {
+  color: var(--raizo-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.raizo-dock-btn-active {
+  background-color: #F97316;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+}
+.raizo-dock-btn-active-blue {
+  background-color: var(--raizo-primary);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(91, 141, 239, 0.35);
+}
+
+/* Unified Page Header Pattern */
+.raizo-page-header {
+  border-bottom: 1px solid var(--raizo-border);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .raizo-page-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+.raizo-page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--raizo-primary);
+  margin-bottom: 6px;
+}
+.raizo-page-title {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--raizo-text-primary);
+}
+@media (min-width: 640px) {
+  .raizo-page-title {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
+.raizo-page-desc {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--raizo-text-secondary);
+  max-width: 48rem;
+  margin-top: 4px;
 }
 
 /* Input Fields (Section 27) */
@@ -358,4 +469,144 @@
 *:focus-visible {
   outline: 2px solid var(--raizo-primary);
   outline-offset: 2px;
+}
+
+/* ==========================================================================
+   3D SPATIAL & EDTECH DEPTH UTILITIES
+   ========================================================================== */
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1500 {
+  perspective: 1500px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.translate-z-10 {
+  transform: translateZ(10px);
+}
+
+.translate-z-20 {
+  transform: translateZ(20px);
+}
+
+.translate-z-30 {
+  transform: translateZ(30px);
+}
+
+.translate-z-40 {
+  transform: translateZ(40px);
+}
+
+/* 3D Specular Sheen & Hologram Glow */
+.raizo-3d-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+  will-change: transform;
+}
+
+.raizo-3d-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(56, 189, 248, 0.15),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.raizo-3d-card:hover .raizo-3d-sheen {
+  opacity: 1;
+}
+
+/* Ambient 3D Glowing Mesh Background */
+.edtech-mesh-gradient {
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(14, 165, 233, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(2, 132, 199, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 10% 30%, rgba(16, 185, 129, 0.08), transparent 50%);
+}
+
+.raizo-3d-glass {
+  background: rgba(21, 27, 36, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.raizo-3d-glow-azure {
+  box-shadow: 0 0 35px -5px rgba(14, 165, 233, 0.25), 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+}
+
+.raizo-3d-glow-emerald {
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25), 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-0.75deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(-6px) rotate(-0.5deg);
+  }
+  50% {
+    transform: translateY(4px) rotate(0.5deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out 1.5s infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
 }

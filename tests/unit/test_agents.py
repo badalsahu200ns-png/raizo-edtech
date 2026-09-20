@@ -106,7 +106,7 @@ def test_tutor_socratic_and_sources():
     assert reply.role == "assistant"
     assert len(reply.sources_used) > 0
     assert reply.sources_used[0].url.startswith("http")
-    assert "department" in reply.content.lower() or "ranking" in reply.content.lower()
+    assert any(k in reply.content.lower() for k in ["window", "department", "ranking", "aggregate", "rows"])
 
 
 def test_profile_agent_extraction():

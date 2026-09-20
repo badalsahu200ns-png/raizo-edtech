@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -84,15 +84,17 @@ export default function ProjectsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-10 py-6">
       {/* Header - Answers: "Can I build real-world work that employers value?" */}
-      <div className="border-b border-[#27303B] pb-6 space-y-2">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
-          PRACTICAL WORK DEMONSTRATION
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-          Projects
+      <div className="raizo-page-header">
+        <div className="raizo-page-eyebrow">
+          <span>PORTFOLIO CAPSTONES</span>
+          <span>•</span>
+          <span>EMPIRICAL CODE ARTIFACTS</span>
+        </div>
+        <h1 className="raizo-page-title">
+          Production Capstones & Real-World Projects
         </h1>
-        <p className="text-sm text-[#B4BDC8] max-w-2xl leading-relaxed">
-          Build practical work that demonstrates your ability to employers.
+        <p className="raizo-page-desc">
+          Build practical, production-grade work that demonstrates your ability to employers with verified execution artifacts.
         </p>
       </div>
 

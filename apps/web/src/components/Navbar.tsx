@@ -36,7 +36,7 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
 
   const navLinks = [
     { href: "/dashboard", label: "Home", icon: Compass },
-    { href: "/assessment", label: "Assess", icon: FileCheck2 },
+    { href: "/assessment", label: "Assessment", icon: FileCheck2 },
     { href: "/learn", label: "Learn", icon: BookOpen },
     { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet },
     { href: "/practice", label: "Practice", icon: Sparkles },

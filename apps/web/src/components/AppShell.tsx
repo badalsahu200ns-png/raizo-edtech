@@ -40,16 +40,21 @@ interface NavItem {
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: Compass },
-  { href: "/assessment", label: "Assess", icon: FileCheck2 },
-  { href: "/learn", label: "Learn", icon: BookOpen },
-  { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet, badge: "Lab" },
-  { href: "/practice", label: "Practice", icon: Sparkles },
-  { href: "/skills", label: "Verified Skills", icon: CheckCircle2 },
-  { href: "/job-analysis", label: "Career Intelligence", icon: Briefcase, badge: "ATS" },
+  { href: "/dashboard", label: "Dashboard", icon: Compass },
+  { href: "/learn", label: "Learning", icon: BookOpen },
+  { href: "/assessment", label: "Assessment", icon: FileCheck2 },
   { href: "/resume", label: "Resume", icon: FileText },
-  { href: "/reports", label: "Progress", icon: BarChart3 },
+  { href: "/job-analysis", label: "Career Intelligence", icon: Briefcase, badge: "ATS" },
+  { href: "/tutor", label: "Tutor", icon: Sparkles },
+  { href: "/learn/data-lab", label: "Data Lab", icon: FileSpreadsheet, badge: "Lab" },
+  { href: "/evidence", label: "Evidence", icon: CheckCircle2 }
+];
+
+const SECONDARY_NAV: NavItem[] = [
+  { href: "/practice", label: "Practice", icon: Layers },
+  { href: "/skills", label: "Skills Catalog", icon: Award },
   { href: "/projects", label: "Projects", icon: Layers },
+  { href: "/reports", label: "Progress Reports", icon: BarChart3 },
   { href: "/certificate", label: "Certificates", icon: Award }
 ];
 
@@ -210,18 +215,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <aside className="hidden lg:block w-64 shrink-0 border-r border-[#27303B] bg-[#11161D] py-6 px-4 space-y-6" suppressHydrationWarning>
             <div className="space-y-1" suppressHydrationWarning>
               <span className="text-[10px] font-bold tracking-widest text-[#7E8996] uppercase px-3 block mb-2">
-                CAREER JOURNEY
+                MAIN PRODUCTS
               </span>
               {PRIMARY_NAV.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || (item.href === "/skills" && pathname?.startsWith("/skills"));
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                       isActive
-                        ? "bg-[#5B8DEF]/12 text-[#5B8DEF] font-semibold border-l-2 border-[#5B8DEF]"
+                        ? "bg-[#18202A] text-[#F5F7FA] font-semibold border-l-2 border-[#5B8DEF] shadow-xs"
                         : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
                     }`}
                   >
@@ -233,6 +238,34 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           {item.badge}
                         </span>
                       )}
+                    </div>
+                    {isActive && <ChevronRight className="h-3 w-3 text-[#5B8DEF]" />}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Secondary Tools & Catalog */}
+            <div className="space-y-1 pt-3 border-t border-[#27303B]/60" suppressHydrationWarning>
+              <span className="text-[10px] font-bold tracking-widest text-[#7E8996] uppercase px-3 block mb-2">
+                APPLIED PRACTICE & PROOF
+              </span>
+              {SECONDARY_NAV.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || (item.href === "/skills" && pathname?.startsWith("/skills"));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      isActive
+                        ? "bg-[#18202A] text-[#F5F7FA] font-semibold border-l-2 border-[#5B8DEF]"
+                        : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2.5">
+                      <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#5B8DEF]" : "text-[#7E8996]"}`} />
+                      <span>{item.label}</span>
                     </div>
                     {isActive && <ChevronRight className="h-3 w-3 text-[#5B8DEF]" />}
                   </Link>
@@ -306,19 +339,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
               <div className="space-y-1" suppressHydrationWarning>
                 <span className="text-[10px] font-bold tracking-widest text-[#7E8996] uppercase px-3 block mb-1">
-                  CAREER JOURNEY
+                  MAIN PRODUCTS
                 </span>
                 {PRIMARY_NAV.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href || (item.href === "/skills" && pathname?.startsWith("/skills"));
+                  const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileDrawerOpen(false)}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                         isActive
-                          ? "bg-[#5B8DEF]/12 text-[#5B8DEF] font-bold border-l-2 border-[#5B8DEF]"
+                          ? "bg-[#18202A] text-[#F5F7FA] font-bold border-l-2 border-[#5B8DEF]"
                           : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
                       }`}
                     >
@@ -331,6 +364,33 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           {item.badge}
                         </span>
                       )}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-1 pt-3 border-t border-[#27303B]/60" suppressHydrationWarning>
+                <span className="text-[10px] font-bold tracking-widest text-[#7E8996] uppercase px-3 block mb-1">
+                  APPLIED PRACTICE & PROOF
+                </span>
+                {SECONDARY_NAV.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href || (item.href === "/skills" && pathname?.startsWith("/skills"));
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isActive
+                          ? "bg-[#18202A] text-[#F5F7FA] font-bold border-l-2 border-[#5B8DEF]"
+                          : "text-[#B4BDC8] hover:text-[#F5F7FA] hover:bg-[#151B23]"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <Icon className={`h-3.5 w-3.5 ${isActive ? "text-[#5B8DEF]" : "text-[#7E8996]"}`} />
+                        <span>{item.label}</span>
+                      </div>
                     </Link>
                   );
                 })}

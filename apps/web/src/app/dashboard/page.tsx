@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -101,66 +101,47 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto py-2">
-      {/* 1. WELCOME SECTION */}
-      <div className="border-b border-[#27303B] pb-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#5B8DEF]/10 text-[#5B8DEF]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5B8DEF]" />
-              AI Career Intelligence Command Center
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#F5F7FA] tracking-tight">
-              Hello, {firstName}.
-            </h1>
-            <p className="text-sm font-semibold text-[#5B8DEF]">
-              Learn with purpose. Prove your skills. Build your future.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2.5 shrink-0">
-            <Link
-              href="/job-analysis"
-              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-sm hover:bg-[#4779D8] transition-all"
-            >
-              <Briefcase className="h-3.5 w-3.5" />
-              <span>ATS Gap Analyzer</span>
-            </Link>
-            <Link
-              href="/learn"
-              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#151B23] border border-[#27303B] text-[#F5F7FA] text-xs font-semibold hover:bg-[#1A212B] transition-all"
-            >
-              <BookOpen className="h-3.5 w-3.5 text-[#B4BDC8]" />
-              <span>Continue Learning</span>
-            </Link>
-          </div>
+      {/* 1. UNIFIED PAGE HEADER */}
+      <div className="raizo-page-header">
+        <div className="space-y-1.5">
+          <span className="raizo-page-eyebrow">
+            <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+            COMMAND CENTER • HELLO, {firstName.toUpperCase()}
+          </span>
+          <h1 className="raizo-page-title">
+            Dashboard
+          </h1>
+          <p className="raizo-page-desc">
+            Track your career readiness, verified capabilities, and next best actions for your transition to {targetRole}.
+          </p>
         </div>
 
-        {/* Editorial Quote */}
-        <div className="border-l-2 border-[#5B8DEF]/40 pl-3.5 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
-          “True career readiness isn’t about how much content you’ve watched. It’s about what you can demonstrate under real-world scrutiny.”
-        </div>
-
-        {/* Progression Steps */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#B4BDC8] bg-[#151B23] p-3 rounded-xl border border-[#27303B]">
-          <span className="text-[10px] uppercase font-bold text-[#7E8996] mr-1">Progression:</span>
-          <span className="text-[#F5F7FA] font-bold">1. Target Role</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#5B8DEF] font-bold">2. Current Readiness</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#F5F7FA] font-bold">3. Skill Gaps</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#5B8DEF] font-bold">4. Next Best Action</span>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Link
+            href="/job-analysis"
+            className="raizo-btn-primary"
+          >
+            <Briefcase className="h-4 w-4" />
+            <span>ATS Gap Analyzer</span>
+          </Link>
+          <Link
+            href="/learn"
+            className="raizo-btn-secondary"
+          >
+            <BookOpen className="h-4 w-4 text-[#B4BDC8]" />
+            <span>Continue Learning</span>
+          </Link>
         </div>
       </div>
 
       {/* 2. CAREER TARGET & READINESS TWIN CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Career Target Card */}
+        {/* Where am I? Career Target Card */}
         <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-7 space-y-4 shadow-xs flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#7E8996]">
-                CAREER TARGET
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF]">
+                WHERE AM I? • CAREER TARGET
               </span>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-[#5B8DEF] bg-[#11161D] px-2.5 py-1 rounded-lg border border-[#27303B]">
                 <Briefcase className="h-3 w-3" />
@@ -203,14 +184,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Career Readiness Card */}
+        {/* What skills am I developing? Career Readiness Card */}
         <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-7 space-y-4 shadow-xs flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#7E8996]">
-                CAREER READINESS
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF]">
+                WHAT SKILLS AM I DEVELOPING? • READINESS
               </span>
-              <span className="text-xs font-semibold text-[#36C98F] bg-[#5B8DEF]/10 px-2.5 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-[#36C98F] bg-[#36C98F]/10 px-2.5 py-0.5 rounded-full border border-[#36C98F]/20">
                 On Track
               </span>
             </div>
@@ -229,7 +210,7 @@ export default function DashboardPage() {
 
             {/* Simple progress bar */}
             <div className="space-y-1.5 pt-1">
-              <div className="h-3 w-full rounded-full bg-[#1A212B] overflow-hidden">
+              <div className="h-2.5 w-full rounded-full bg-[#1A212B] overflow-hidden">
                 <div
                   className="h-full rounded-full bg-[#5B8DEF] transition-all duration-700"
                   style={{ width: `${readinessPercent}%` }}
@@ -260,12 +241,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 3. RECOMMENDED NEXT STEP HERO BANNER */}
+      {/* 3. WHAT SHOULD I DO NEXT? HERO BANNER */}
       <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 sm:p-8 space-y-4 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF] block">
-              RECOMMENDED NEXT STEP
+              WHAT SHOULD I DO NEXT? • ACTIONABLE RECOMMENDATION
             </span>
             <h3 className="text-xl sm:text-2xl font-extrabold text-[#F5F7FA]">
               Strengthen SQL Window Functions
@@ -278,14 +259,14 @@ export default function DashboardPage() {
           <div className="shrink-0 flex items-center gap-3">
             <Link
               href="/practice"
-              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-sm hover:bg-[#4779D8] transition-all"
+              className="raizo-btn-primary"
             >
-              <span>Continue</span>
+              <span>Continue Practice</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/learn"
-              className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#11161D] border border-[#27303B] text-[#F5F7FA] text-xs font-semibold hover:bg-[#1A212B] transition-all"
+              href="/tutor?topic=SQL%20Window%20Functions"
+              className="raizo-btn-secondary"
             >
               <span>Ask Tutor</span>
             </Link>
@@ -298,14 +279,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4. LEARNING PROGRESS & RECENT ACTIVITY DUAL COLUMNS */}
+      {/* 4. WHAT HAVE I COMPLETED? & WHAT EVIDENCE HAVE I GENERATED? */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Learning Progress Summary */}
+        {/* What have I completed? Learning Milestones */}
         <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[#F5F7FA]">Learning Progress</h3>
-              <p className="text-xs text-[#B4BDC8]">Key milestones completed along your journey</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF] block">
+                WHAT HAVE I COMPLETED?
+              </span>
+              <h3 className="text-sm font-bold text-[#F5F7FA]">Milestones Achieved</h3>
             </div>
             <Link href="/skills" className="text-xs font-semibold text-[#5B8DEF] hover:underline">
               View All Skills
@@ -343,14 +326,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Meaningful Activity */}
+        {/* What evidence have I generated? Recent Meaningful Activity */}
         <div className="rounded-2xl border border-[#27303B] bg-[#151B23] p-6 space-y-4 shadow-xs">
           <div className="flex items-center justify-between border-b border-[#27303B] pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[#F5F7FA]">Recent Activity</h3>
-              <p className="text-xs text-[#B4BDC8]">Your verified accomplishments</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B8DEF] block">
+                WHAT EVIDENCE HAVE I GENERATED?
+              </span>
+              <h3 className="text-sm font-bold text-[#F5F7FA]">Demonstrated Evidence Ledger</h3>
             </div>
-            <span className="text-xs text-[#7E8996]">Recent</span>
+            <Link href="/evidence" className="text-xs font-semibold text-[#5B8DEF] hover:underline">
+              View All Records
+            </Link>
           </div>
 
           <div className="space-y-2.5">

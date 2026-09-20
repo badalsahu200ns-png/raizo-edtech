@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -184,83 +184,76 @@ function LearnContent() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 py-2">
-      {/* 1. PAGE HEADER (Section 3) */}
-      <div className="border-b border-[#27303B] pb-4 space-y-2">
-        <div className="flex items-center space-x-2">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DEF] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full font-bold">
-            [02 — LEARN]
+      {/* 1. UNIFIED PAGE HEADER */}
+      <div className="raizo-page-header">
+        <div className="space-y-1.5">
+          <span className="raizo-page-eyebrow">
+            <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+            LEARNING
           </span>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-              Adaptive Learning & AI Tutor
-            </h1>
-            <p className="text-xs sm:text-sm font-medium text-[#B4BDC8]">
-              Prerequisite-aware concepts and Socratic AI guidance for job-ready capability.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowHandbook(!showHandbook)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#27303B] bg-[#151B23] hover:border-[#5B8DEF] hover:text-[#5B8DEF] text-xs font-semibold text-[#F5F7FA] transition-colors shadow-xs"
-            >
-              <BookOpen className="h-3.5 w-3.5 text-[#5B8DEF]" />
-              <span>Study Handbook</span>
-            </button>
-            <Link
-              href="/practice"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold shadow-xs hover:bg-[#4779D8] transition-colors"
-            >
-              <span>Go to Practice</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+          <h1 className="raizo-page-title">
+            Learn by doing.
+          </h1>
+          <p className="raizo-page-desc">
+            Build practical skills through guided learning, real datasets, assessments, and applied projects.
+          </p>
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
+            <span className="text-[10px] font-bold uppercase text-[#7E8996]">Progression:</span>
+            <span className="text-[#F5F7FA] font-bold">TARGETED CONCEPT</span>
+            <span className="text-[#5B8DEF] font-bold">→</span>
+            <span className="text-[#38BDF8] font-bold">GUIDED INTUITION</span>
+            <span className="text-[#5B8DEF] font-bold">→</span>
+            <span className="text-[#36C98F] font-bold">APPLIED FOUNDATION</span>
           </div>
         </div>
 
-        <div className="border-l-2 border-[#5B8DEF]/40 pl-3 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
-          “The right lesson is the one you need next.”
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setShowHandbook(!showHandbook)}
+            className="raizo-btn-secondary"
+          >
+            <BookOpen className="h-4 w-4 text-[#5B8DEF]" />
+            <span>Study Handbook</span>
+          </button>
+          <Link
+            href="/practice"
+            className="raizo-btn-primary"
+          >
+            <span>Go to Practice</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
-          <span className="text-[10px] font-bold uppercase text-[#7E8996]">Progression:</span>
-          <span className="text-[#F5F7FA] font-bold">TARGETED CONCEPT</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#5B8DEF] font-bold">GUIDED INTUITION</span>
-          <span className="text-[#CBD2CB]">→</span>
-          <span className="text-[#F5F7FA] font-bold">APPLIED FOUNDATION</span>
-        </div>
+      </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center gap-2 pt-3">
-          <button
-            type="button"
-            onClick={() => setMainTab("curriculum")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-              mainTab === "curriculum"
-                ? "bg-[#5B8DEF] text-white shadow-xs"
-                : "bg-[#151B23] text-gray-700 hover:bg-gray-100 border border-gray-200"
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Curriculum & AI Tutor</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMainTab("data-lab")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-              mainTab === "data-lab"
-                ? "bg-[#5B8DEF] text-white shadow-xs"
-                : "bg-[#151B23] text-gray-700 hover:bg-gray-100 border border-gray-200"
-            }`}
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Data Analysis Lab</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-amber-950 uppercase">
-              New
-            </span>
-          </button>
-        </div>
+      {/* Docked Tab Switcher (Huddlekit style) */}
+      <div className="flex items-center gap-2 pb-2">
+        <button
+          type="button"
+          onClick={() => setMainTab("curriculum")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            mainTab === "curriculum"
+              ? "bg-[#5B8DEF] text-white shadow-xs"
+              : "bg-[#151B23] text-[#B4BDC8] hover:bg-[#18202A] hover:text-[#F5F7FA] border border-[#27303B]"
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5" />
+          <span>Curriculum & AI Tutor</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMainTab("data-lab")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            mainTab === "data-lab"
+              ? "bg-[#5B8DEF] text-white shadow-xs"
+              : "bg-[#151B23] text-[#B4BDC8] hover:bg-[#18202A] hover:text-[#F5F7FA] border border-[#27303B]"
+          }`}
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5" />
+          <span>Data Analysis Lab</span>
+          <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#F97316] text-white uppercase">
+            New
+          </span>
+        </button>
       </div>
 
       {mainTab === "data-lab" ? (
@@ -268,7 +261,7 @@ function LearnContent() {
       ) : (
         <>
           {/* Data Lab Highlight Card */}
-          <div className="rounded-2xl border border-[#5B8DEF]/30 bg-gradient-to-r from-[#F4FAF6] via-[#176B5B]/5 to-transparent p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="rounded-2xl border border-[#5B8DEF]/30 bg-gradient-to-r from-[#18202A] via-[#151B23] to-[#11161D] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 rounded-xl bg-[#5B8DEF]/10 text-[#5B8DEF] flex items-center justify-center shrink-0">
                 <FileSpreadsheet className="h-5 w-5" />
@@ -280,7 +273,7 @@ function LearnContent() {
                   </span>
                   <span className="text-xs font-bold text-[#F5F7FA]">RAIZO Data Analysis Lab</span>
                 </div>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-xs text-[#94A3B8] mt-0.5">
                   Upload real CSV or Excel datasets to audit missingness, detect IQR outliers, deduplicate rows, and explore correlations.
                 </p>
               </div>
@@ -288,15 +281,15 @@ function LearnContent() {
             <button
               type="button"
               onClick={() => setMainTab("data-lab")}
-              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#5B8DEF] text-white text-xs font-bold hover:bg-[#4779D8] transition-colors whitespace-nowrap shadow-xs"
+              className="raizo-btn-primary whitespace-nowrap"
             >
               <span>Launch Data Lab</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          {/* 2. LEARNING RECOMMENDATION BANNER (Section 3 Example) */}
-          <div className="rounded-xl border border-[#5B8DEF]/30 bg-[#F4FAF6] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          {/* 2. LEARNING RECOMMENDATION BANNER */}
+          <div className="rounded-xl border border-[#5B8DEF]/30 bg-[#151B23] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center space-x-3">
               <div className="h-9 w-9 rounded-lg bg-[#5B8DEF]/10 text-[#5B8DEF] flex items-center justify-center shrink-0">
                 <Sparkles className="h-5 w-5" />

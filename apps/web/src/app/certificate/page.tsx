@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -104,22 +104,24 @@ export default function CertificatePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-10 py-6">
       {/* Header - Answers: "What official credential have I earned?" */}
-      <div className="border-b border-[#27303B] pb-6 space-y-2">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
-          OFFICIAL CREDENTIALS
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-          Verified Certificates
+      <div className="raizo-page-header">
+        <div className="raizo-page-eyebrow">
+          <span>OFFICIAL CREDENTIALS</span>
+          <span>•</span>
+          <span>CRYPTOGRAPHIC VERIFICATION</span>
+        </div>
+        <h1 className="raizo-page-title">
+          Verified Certificates & Credentials
         </h1>
-        <p className="text-sm text-[#B4BDC8] max-w-2xl leading-relaxed">
-          Credentials earned through demonstrated learning and verified assessment.
+        <p className="raizo-page-desc">
+          Credentials earned through empirical demonstration and tamper-evident assessment verification.
         </p>
       </div>
 
       {/* Main Certificate Display Card */}
       <div className="rounded-3xl border border-[#27303B] bg-[#151B23] p-6 sm:p-10 space-y-8 shadow-sm relative overflow-hidden">
         {/* Visual Certificate Frame */}
-        <div className="rounded-2xl border-2 border-[#17211F]/10 p-6 sm:p-10 space-y-6 bg-gradient-to-b from-[#FCFCFA] to-white relative">
+        <div className="rounded-2xl border-2 border-[#27303B] p-6 sm:p-10 space-y-6 bg-gradient-to-b from-[#11161D] to-[#0D1117] relative">
           <div className="flex items-center justify-between border-b border-[#27303B] pb-4">
             <div className="flex items-center space-x-3">
               <RaizoMark size={32} />

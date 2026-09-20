@@ -91,49 +91,77 @@ export const DataLabSection: React.FC<DataLabSectionProps> = ({ showReturnLink =
   return (
     <div className="space-y-8">
       {/* Sub-Header / Status Banner */}
-      <div className="rounded-2xl bg-[#151B23] border border-[#27303B] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#5B8DEF]/15 text-[#5B8DEF] border border-[#5B8DEF]/20 uppercase tracking-wider">
-              RAIZO Lab Engine
-            </span>
-            {showReturnLink && (
-              <>
-                <span className="text-[#7E8996]">•</span>
-                <Link
-                  href="/learn"
-                  className="text-xs font-semibold text-[#B4BDC8] hover:text-[#5B8DEF] transition-colors"
-                >
-                  ← Return to Curriculum & Socratic Tutor
-                </Link>
-              </>
-            )}
+      <div className="rounded-2xl bg-[#151B23] border border-[#27303B] p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#5B8DEF]/15 text-[#5B8DEF] border border-[#5B8DEF]/20 uppercase tracking-wider">
+                RAIZO LAB ENGINE
+              </span>
+              {showReturnLink && (
+                <>
+                  <span className="text-[#7E8996]">•</span>
+                  <Link
+                    href="/learn"
+                    className="text-xs font-semibold text-[#B4BDC8] hover:text-[#5B8DEF] transition-colors"
+                  >
+                    ← Return to Curriculum
+                  </Link>
+                </>
+              )}
+            </div>
+            <h2 className="text-xl font-extrabold text-[#F5F7FA]">
+              Interactive CSV & Excel Data Analysis Lab
+            </h2>
+            <p className="text-xs font-medium text-[#B4BDC8]">
+              Professional analytical workbench for exploratory data analysis, quality auditing, cleaning transformations, and correlation discovery.
+            </p>
           </div>
-          <h2 className="text-xl font-extrabold text-[#F5F7FA]">
-            Interactive CSV & Excel Data Analysis Lab
-          </h2>
-          <p className="text-xs font-medium text-[#B4BDC8]">
-            Upload your data. Understand it. Clean it. Analyze it. Visualize it.
-          </p>
+
+          {workingDataset && (
+            <button
+              type="button"
+              onClick={() => {
+                setOriginalDataset(null);
+                setWorkingDataset(null);
+                setAnalysis(null);
+                setTransformations([]);
+              }}
+              className="raizo-btn-secondary self-start md:self-auto"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Upload Another Dataset</span>
+            </button>
+          )}
         </div>
 
-        {workingDataset && (
-          <button
-            type="button"
-            onClick={() => {
-              setOriginalDataset(null);
-              setWorkingDataset(null);
-              setAnalysis(null);
-              setTransformations([]);
-            }}
-            className="px-4 py-2 rounded-xl bg-[#11161D] border border-[#27303B] hover:border-[#5B8DEF] text-[#F5F7FA] hover:text-[#5B8DEF] text-xs font-bold transition-all shadow-xs flex items-center gap-2 self-start md:self-auto cursor-pointer"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Upload Another Dataset</span>
-          </button>
-        )}
+        {/* 7-Step Analytical Pipeline Stepper (Prompt #13) */}
+        <div className="pt-3 border-t border-[#27303B] flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+          {[
+            { step: "Upload", active: true },
+            { step: "Understand", active: !!workingDataset },
+            { step: "Clean", active: !!workingDataset && transformations.length > 0 },
+            { step: "Relationships", active: !!workingDataset },
+            { step: "Visualize", active: !!workingDataset },
+            { step: "Insights", active: !!workingDataset },
+            { step: "Learn", active: !!workingDataset }
+          ].map((item, idx) => (
+            <React.Fragment key={item.step}>
+              <span
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  item.active
+                    ? "bg-[#5B8DEF]/15 text-[#5B8DEF] border border-[#5B8DEF]/30"
+                    : "bg-[#11161D] text-[#7E8996] border border-[#27303B]"
+                }`}
+              >
+                {item.step}
+              </span>
+              {idx < 6 && <span className="text-[#5B8DEF] font-bold">→</span>}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
 
       {/* When NO dataset is loaded: Show Full Upload View */}

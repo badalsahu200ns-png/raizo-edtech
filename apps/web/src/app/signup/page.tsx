@@ -4,19 +4,20 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Brain,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
   Sparkles,
-  UserCheck,
-  Compass,
-  Layers,
-  GraduationCap
+  AlertCircle,
+  Lock,
+  ArrowRight,
+  Terminal,
+  Award,
+  BookOpen
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import RaizoLogo from "@/components/RaizoLogo";
+import RaizoEducationIcon from "@/components/RaizoEducationIcon";
+import Card3DTilt from "@/components/3d/Card3DTilt";
 
 declare global {
   interface Window {
@@ -41,129 +42,137 @@ function SignupContent() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [targetRole, setTargetRole] = useState("data_analyst");
 
-  // If already authenticated, redirect to dashboard
+  // Local development flag: only true on localhost development environments
+  const isLocalDev =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      process.env.NODE_ENV === "development" ||
+      process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO === "true");
+
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.replace("/dashboard");
+      router.replace(redirectPath);
     }
-  }, [authLoading, isAuthenticated, router]);
+  }, [authLoading, isAuthenticated, redirectPath, router]);
 
-  // Load Google Identity Services script if client ID is set
+  // Load Google Identity Services script
   useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!clientId) return;
+    const existingScript = document.getElementById("google-gsi-script");
+    if (existingScript && window.google?.accounts?.id) {
+      initializeGoogleGSI(clientId);
+      return;
+    }
 
     const script = document.createElement("script");
+    script.id = "google-gsi-script";
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      if (window.google?.accounts?.id) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: async (response: any) => {
-            if (response.credential) {
-              await handleCredentialSignup(response.credential);
-            }
-          }
-        });
-
-        const btnContainer = document.getElementById("google-signup-btn-container");
-        if (btnContainer) {
-          window.google.accounts.id.renderButton(btnContainer, {
-            theme: "outline",
-            size: "large",
-            width: "100%",
-            text: "signup_with",
-            shape: "rectangular",
-            logo_alignment: "left"
-          });
-        }
-      }
+      initializeGoogleGSI(clientId);
     };
     document.body.appendChild(script);
-
-    return () => {
-      try {
-        document.body.removeChild(script);
-      } catch {
-        // ignore
-      }
-    };
   }, []);
+
+  const initializeGoogleGSI = (clientId?: string) => {
+    if (!window.google?.accounts?.id || !clientId) return;
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response: any) => {
+        if (response.credential) {
+          await handleCredentialSignup(response.credential);
+        }
+      }
+    });
+
+    const btnContainer = document.getElementById("google-signup-official-btn");
+    if (btnContainer) {
+      window.google.accounts.id.renderButton(btnContainer, {
+        theme: "filled_blue",
+        size: "large",
+        width: "100%",
+        text: "signup_with",
+        shape: "rectangular",
+        logo_alignment: "left"
+      });
+    }
+  };
 
   const handleCredentialSignup = async (credential: string) => {
     setLoading(true);
     setError(null);
     try {
       const res = await loginWithGoogle(credential);
-      // If newly registered user, route to onboarding or dashboard
       if (res && res.is_new_user) {
         router.push("/onboarding");
       } else {
         router.push(redirectPath);
       }
     } catch (err: any) {
-      setError(err.message || "Failed to create account with Google. Please try again.");
+      setError(
+        err.message ||
+          "Failed to register with Google. Please ensure you are using a verified Google account."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInstantNewUserSignup = async () => {
-    const randomId = Math.floor(1000 + Math.random() * 9000);
-    const demoNewEmail = `new.learner.${randomId}@example.com`;
-    const demoNewName = `Jane Learner ${randomId}`;
-    await handleCredentialSignup(`test_google:${demoNewEmail}:${demoNewName}::`);
-  };
-
-  const handleFormSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !name) {
-      setError("Please provide both your name and Google email address.");
+  // Localhost-only developer registration testing
+  const handleLocalDevSignup = async () => {
+    if (!isLocalDev) {
+      setError("Dummy account creation is disabled in production.");
       return;
     }
-    await handleCredentialSignup(`test_google:${email.trim()}:${name.trim()}::`);
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    await handleCredentialSignup(
+      `test_google:dev.learner.${rand}@example.com:Dev Learner ${rand}::`
+    );
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-center py-10 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
+    <div className="min-h-[85vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden edtech-mesh-gradient">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3 relative z-10">
         <div className="inline-flex justify-center">
-          <RaizoLogo size={34} />
+          <RaizoEducationIcon size={64} />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] tracking-tight">
-          Create your RAIZO account
+        <h1 className="text-2xl sm:text-3xl font-black text-[#F5F7FA] tracking-tight">
+          Join the RAIZO Platform
         </h1>
-        <p className="text-xs sm:text-sm text-[#B4BDC8]">
-          Sign up with Google to begin your adaptive learning journey and turn skills into verified career progress.
+        <p className="text-xs sm:text-sm text-[#A7B0BC] max-w-sm mx-auto">
+          Start your personalized career intelligence journey. Verify genuine analytical skills with cryptographic proof.
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[#151B23] py-8 px-6 shadow-sm border border-[#27303B] rounded-2xl sm:px-10 space-y-6">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="raizo-3d-glass py-8 px-6 border border-[#2A3649] rounded-3xl sm:px-10 space-y-6 raizo-3d-glow-azure">
           {error && (
-            <div className="rounded-xl bg-[#E86A6A]/10 p-3.5 border border-[#E86A6A]/30 flex items-start gap-2.5 text-xs text-[#E86A6A]">
+            <div className="rounded-xl bg-[#EF4444]/10 p-3.5 border border-[#EF4444]/30 flex items-start gap-2.5 text-xs text-[#EF4444]">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Official Google GIS Button Container */}
-          <div id="google-signup-btn-container" className="min-h-[44px] flex justify-center" />
+          {/* Official GIS Button Container */}
+          <div id="google-signup-official-btn" className="min-h-[44px] flex justify-center w-full" />
 
-          {/* 1-Click Fast New Learner Registration */}
+          {/* Google Sign-Up Primary Action */}
           <div>
             <button
-              onClick={handleInstantNewUserSignup}
+              onClick={() => {
+                if (window.google?.accounts?.id) {
+                  window.google.accounts.id.prompt();
+                } else {
+                  setError("Google Identity Services is initializing. Please try again in a moment.");
+                }
+              }}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[#202832] bg-[#151B23] hover:bg-[#11161D] hover:border-[#5B8DEF] text-xs sm:text-sm font-bold text-[#F5F7FA] shadow-xs transition-all disabled:opacity-60 group"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-[#2C384A] bg-[#11161D] hover:bg-[#161D26] hover:border-[#0EA5E9] text-xs sm:text-sm font-bold text-[#F5F7FA] shadow-md transition-all disabled:opacity-60 group cursor-pointer"
             >
-              {/* Google G SVG */}
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -182,97 +191,56 @@ function SignupContent() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{loading ? "Creating account..." : "Sign Up with Google (1-Click)"}</span>
-              <Sparkles className="h-3.5 w-3.5 text-[#5B8DEF] ml-auto" />
+              <span>{loading ? "Creating verified account..." : "Sign Up with Google"}</span>
+              <Sparkles className="h-4 w-4 text-[#38BDF8] ml-auto" />
             </button>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#27303B]" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-[#151B23] px-2 text-[#7E8996] font-medium">
-                Or enter your Google profile details
-              </span>
-            </div>
-          </div>
-
-          {/* New User Google Registration Form */}
-          <form onSubmit={handleFormSignup} className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-bold text-[#B4BDC8] mb-1">
-                Your Full Name
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Jane Doe"
-                className="w-full rounded-xl border border-[#27303B] bg-[#11161D] px-3.5 py-2 text-xs text-[#F5F7FA] focus:border-[#5B8DEF] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-[#B4BDC8] mb-1">
-                Google Email Address
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane.doe@gmail.com"
-                className="w-full rounded-xl border border-[#27303B] bg-[#11161D] px-3.5 py-2 text-xs text-[#F5F7FA] focus:border-[#5B8DEF] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-[#B4BDC8] mb-1">
-                Initial Career Track
-              </label>
-              <select
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                className="w-full rounded-xl border border-[#27303B] bg-[#11161D] px-3.5 py-2 text-xs text-[#F5F7FA] focus:border-[#5B8DEF] focus:outline-none"
-              >
-                <option value="data_analyst">Data Analyst Track</option>
-                <option value="business_intelligence">Business Intelligence Analyst</option>
-                <option value="analytics_engineer">Analytics Engineer</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#5B8DEF] text-white text-xs sm:text-sm font-bold hover:bg-[#4779D8] transition-all disabled:opacity-60 shadow-sm"
-            >
-              <span>{loading ? "Registering Account..." : "Create Account with Google"}</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </form>
 
           {/* Value Props Pills */}
-          <div className="space-y-2 pt-2 border-t border-[#27303B] text-xs text-[#B4BDC8]">
+          <div className="space-y-2.5 pt-2 border-t border-[#222A36] text-xs text-[#A7B0BC]">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-[#36C98F] shrink-0" />
-              <span>Personalized skill gap diagnosis & DAG roadmap</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
+              <span>Verified Google account required for production authentication</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-[#36C98F] shrink-0" />
-              <span>Verifiable credentials backed by cryptographic ledger</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
+              <span>Personalized skill gap diagnosis & DAG curriculum</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
+              <span>Tamper-evident HMAC-SHA256 verified credentials</span>
             </div>
           </div>
 
+          {/* Localhost Sandbox Shortcut */}
+          {isLocalDev && (
+            <div className="pt-3 border-t border-dashed border-[#F59E0B]/30 space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold text-[#F59E0B]">
+                <div className="flex items-center gap-1">
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>Localhost Testing Only</span>
+                </div>
+                <span className="font-mono bg-[#F59E0B]/10 px-1.5 py-0.5 rounded">DEV</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLocalDevSignup}
+                disabled={loading}
+                className="w-full py-2 px-3 rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold transition-all disabled:opacity-60 cursor-pointer"
+              >
+                Create Random Localhost Dev Learner
+              </button>
+            </div>
+          )}
+
           {/* Switch to Login */}
-          <div className="text-center pt-2 text-xs text-[#B4BDC8]">
+          <div className="text-center pt-2 text-xs text-[#A7B0BC]">
             Already have a RAIZO account?{" "}
             <Link
               href="/login"
-              className="font-bold text-[#5B8DEF] hover:text-[#4779D8] underline decoration-[#176B5B]/30 transition-colors"
+              className="font-bold text-[#38BDF8] hover:text-[#0EA5E9] underline decoration-[#38BDF8]/30 transition-colors"
             >
-              Sign in with Google ?
+              Sign in with Google →
             </Link>
           </div>
         </div>
@@ -286,8 +254,8 @@ export default function SignupPage() {
     <Suspense
       fallback={
         <div className="min-h-[85vh] flex flex-col items-center justify-center text-center space-y-4">
-          <Brain className="h-10 w-10 text-[#5B8DEF] animate-pulse" />
-          <p className="text-xs text-[#B4BDC8]">Loading Sign Up...</p>
+          <div className="h-10 w-10 border-2 border-[#0EA5E9] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-[#A7B0BC]">Loading Sign Up...</p>
         </div>
       }
     >

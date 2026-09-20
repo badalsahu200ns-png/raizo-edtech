@@ -84,14 +84,14 @@ def generate_unique_certificate_id(target_role: str) -> str:
 
     for _ in range(10):
         rand_token = secrets.token_hex(2).upper()
-        candidate_id = f"{role_code}-{year}-{rand_token}"
+        candidate_id = f"RAIZO-{year}-{role_code}-{rand_token}"
         cursor.execute("SELECT id FROM certificates WHERE certificate_id = ?", (candidate_id,))
         if not cursor.fetchone():
             conn.close()
             return candidate_id
 
     conn.close()
-    return f"{role_code}-{year}-{secrets.token_hex(2).upper()}"
+    return f"RAIZO-{year}-{role_code}-{secrets.token_hex(2).upper()}"
 
 
 def check_certificate_eligibility(user_id: str) -> Dict[str, Any]:
@@ -251,8 +251,17 @@ def draw_certificate_pdf(cert_data: Dict[str, Any], qr_bytes: bytes, output_path
     c.setFillColor(colors.HexColor("#176B5B"))
     c.rect(logo_cx - 4, logo_top - 10, 6, 6, fill=1, stroke=0)
     # Diagonal leg
-    c.setFillColor(colors.HexColor("#ffffff"))
-    c.polygon([
+    def _draw_poly(pts, fill=1, stroke=0):
+        if not pts:
+            return
+        p = c.beginPath()
+        p.moveTo(pts[0][0], pts[0][1])
+        for pt in pts[1:]:
+            p.lineTo(pt[0], pt[1])
+        p.close()
+        c.drawPath(p, fill=fill, stroke=stroke)
+
+    _draw_poly([
         (logo_cx - 3, logo_top - 12),
         (logo_cx + 4, logo_top - 20),
         (logo_cx + 7.5, logo_top - 20),
@@ -260,7 +269,7 @@ def draw_certificate_pdf(cert_data: Dict[str, Any], qr_bytes: bytes, output_path
     ], fill=1, stroke=0)
     # Radiant Amber Apex Facet
     c.setFillColor(colors.HexColor("#d9a441"))
-    c.polygon([
+    _draw_poly([
         (logo_cx + 1, logo_top - 4),
         (logo_cx + 6, logo_top - 8),
         (logo_cx + 4, logo_top - 8),

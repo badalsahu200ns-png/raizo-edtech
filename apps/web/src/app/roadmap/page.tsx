@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -159,13 +159,15 @@ export default function RoadmapPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#27303B] pb-6">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#5B8DEF]">
-            ADAPTIVE LEARNING PATHWAY
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] mt-1">
-            Learning Journey: 01 to 06
+          <div className="raizo-page-eyebrow">
+            <span>ADAPTIVE LEARNING PATHWAY</span>
+            <span>•</span>
+            <span>01 TO 06 PROGRESSION</span>
+          </div>
+          <h1 className="raizo-page-title">
+            Adaptive Learning Roadmap
           </h1>
-          <p className="text-xs sm:text-sm text-[#B4BDC8] mt-1 max-w-2xl leading-relaxed">
+          <p className="raizo-page-desc">
             A structured vertical progression from diagnostic discovery to applied verification and career advancement.
           </p>
         </div>

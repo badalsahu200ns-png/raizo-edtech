@@ -252,28 +252,25 @@ export default function PracticePage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 py-4 px-2 sm:px-4">
       {/* 1. SECTION HEADER (Section 4) */}
-      <div className="border-b border-[#27303B] pb-5 space-y-2">
-        <div className="flex items-center space-x-2">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DEF] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full font-bold">
-            [03 — PRACTICE]
-          </span>
+      <div className="raizo-page-header">
+        <div className="raizo-page-eyebrow">
+          <span>PRACTICE LAB</span>
+          <span>•</span>
+          <span>HANDS-ON EXECUTION</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA]">
-          Hands-on Practice Lab
+        <h1 className="raizo-page-title">
+          Turn conceptual knowledge into muscle memory.
         </h1>
-        <p className="text-xs sm:text-sm font-medium text-[#B4BDC8]">
-          Can I actually apply what I learned? Hands-on practical exercises organized by skill.
+        <p className="raizo-page-desc">
+          Can I actually apply what I learned? Hands-on practical exercises organized by core skill domains.
         </p>
-        <div className="border-l-2 border-[#5B8DEF]/40 pl-3 py-1 text-xs sm:text-sm italic text-[#B4BDC8]">
-          “Knowledge becomes a skill when you can use it.”
-        </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-1">
-          <span className="text-[10px] font-bold uppercase text-[#7E8996]">Progression:</span>
-          <span className="text-[#F5F7FA] font-bold">ISOLATED EXERCISE</span>
-          <span className="text-[#CBD2CB]">?</span>
-          <span className="text-[#5B8DEF] font-bold">FEEDBACK LOOP</span>
-          <span className="text-[#CBD2CB]">?</span>
-          <span className="text-[#F5F7FA] font-bold">MUSCLE MEMORY</span>
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E8996]">Progression:</span>
+          <span className="text-[#F5F7FA] font-bold">Isolated Exercise</span>
+          <span className="text-[#5B8DEF]">→</span>
+          <span className="text-[#5B8DEF] font-bold">Feedback Loop</span>
+          <span className="text-[#5B8DEF]">→</span>
+          <span className="text-[#36C98F] font-bold">Muscle Memory</span>
         </div>
       </div>
 

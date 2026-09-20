@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -173,28 +173,32 @@ function TutorContent() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 py-2">
-      {/* Top Header (Section 3) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#27303B] pb-3 gap-2">
-        <div>
-          <h1 className="text-2xl font-extrabold text-[#F5F7FA]">
-            RAIZO Tutor
+      {/* 1. UNIFIED PAGE HEADER */}
+      <div className="raizo-page-header">
+        <div className="space-y-1.5">
+          <span className="raizo-page-eyebrow">
+            <span className="h-2 w-2 rounded-full bg-[#5B8DEF]" />
+            AI TUTOR
+          </span>
+          <h1 className="raizo-page-title">
+            RAIZO Socratic Tutor
           </h1>
-          <p className="text-xs font-medium text-[#B4BDC8]">
-            Your AI learning companion for building job-ready skills.
+          <p className="raizo-page-desc">
+            Your adaptive AI companion for mastering core technical concepts, debugging query intuitions, and preparing for live interviews.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowHandbook(!showHandbook)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#27303B] bg-[#151B23] hover:border-[#5B8DEF] hover:text-[#5B8DEF] text-xs font-semibold text-[#F5F7FA] transition-colors"
-          >
-            <BookOpen className="h-3.5 w-3.5 text-[#5B8DEF]" />
-            <span>Curriculum Handbook & Study Cards</span>
-          </button>
-          <span className="text-xs text-[#B4BDC8] flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#2F7D5C]" />
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#36C98F]/10 border border-[#36C98F]/25 text-[#36C98F] text-xs font-semibold">
+            <span className="h-2 w-2 rounded-full bg-[#36C98F] animate-pulse" />
             <span>Curriculum Memory Connected</span>
           </span>
+          <button
+            onClick={() => setShowHandbook(!showHandbook)}
+            className="raizo-btn-secondary"
+          >
+            <BookOpen className="h-4 w-4 text-[#5B8DEF]" />
+            <span>Study Handbook</span>
+          </button>
         </div>
       </div>
 

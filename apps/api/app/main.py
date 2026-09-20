@@ -4,7 +4,7 @@ import json
 import time
 import uuid
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Depends, Header
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, Response
 
@@ -19,7 +19,10 @@ from apps.api.app.security import (
     invalidate_user_session,
     get_authenticated_user_id,
     get_current_user_id,
-    DEFAULT_USER_ID
+    DEFAULT_USER_ID,
+    ALLOW_LOCAL_DEMO,
+    is_local_demo_allowed,
+    check_rate_limit
 )
 from apps.api.app.schemas import (
     GoogleAuthRequest,
@@ -119,14 +122,18 @@ def health_check():
 # ==========================================
 
 @app.post("/api/auth/google")
-def google_authentication(req: GoogleAuthRequest):
+def google_authentication(req: GoogleAuthRequest, request: Request):
     """
     Official Google Sign-In & Sign-Up verification endpoint.
-    1. Verifies Google credential ID token.
-    2. Identifies if learner is an existing user or newly registering.
-    3. Creates new learner account or updates existing account.
-    4. Issues a secure session token and establishes private storage.
+    1. Enforces client rate limiting to mitigate bot abuse and credential stuffing.
+    2. Verifies Google credential ID token (strictly disallows mock accounts in production).
+    3. Identifies if learner is an existing user or newly registering.
+    4. Creates new learner account or updates existing account.
+    5. Issues a secure session token and establishes private storage.
     """
+    client_ip = request.client.host if request.client else "unknown_client"
+    check_rate_limit(f"auth_{client_ip}", limit=20, window_seconds=60)
+
     if not req.credential:
         raise HTTPException(
             status_code=400,
@@ -223,8 +230,14 @@ def get_current_user(
 ):
     """
     Returns the authenticated Google-verified user profile or unauthenticated status.
+    In local development sandbox, defaults to active demo learner if unauthenticated.
+    In production environments, strictly returns unauthenticated (user: None).
     """
-    if not auth_user_id:
+    effective_user_id = auth_user_id
+    if not authorization and not effective_user_id and is_local_demo_allowed():
+        effective_user_id = DEFAULT_USER_ID
+
+    if not effective_user_id:
         return {
             "authenticated": False,
             "user": None,
@@ -237,7 +250,7 @@ def get_current_user(
         SELECT id, email, name, picture, google_id, is_google_verified,
                current_role, target_role, career_goal, timeline_months, weekly_hours 
         FROM users WHERE id = ?
-    """, (auth_user_id,))
+    """, (effective_user_id,))
     row = cursor.fetchone()
     conn.close()
     if not row:
@@ -251,7 +264,7 @@ def get_current_user(
     return {
         "authenticated": True,
         "user": user_dict,
-        "is_demo": auth_user_id == DEFAULT_USER_ID
+        "is_demo": effective_user_id == DEFAULT_USER_ID and is_local_demo_allowed()
     }
 
 

@@ -815,6 +815,5 @@ export const VisualizationEngine: React.FC<VisualizationEngineProps> = ({ datase
         </div>
       </div>
     </div>
-    </div>
   );
 };
