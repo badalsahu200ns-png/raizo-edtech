@@ -237,16 +237,40 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN auth_token TEXT;")
     if "google_id" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN google_id TEXT;")
+    if "provider_user_id" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN provider_user_id TEXT;")
     if "picture" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN picture TEXT;")
+    if "photo_url" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN photo_url TEXT;")
+    if "display_name" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN display_name TEXT;")
+    if "first_name" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN first_name TEXT;")
+    if "last_name" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN last_name TEXT;")
     if "auth_provider" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'google';")
     if "is_google_verified" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN is_google_verified INTEGER DEFAULT 1;")
+    if "email_verified" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 1;")
+    if "onboarding_completed" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN onboarding_completed INTEGER DEFAULT 0;")
     if "token_expires_at" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN token_expires_at TEXT;")
     if "last_login_at" not in user_columns:
         cursor.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT;")
+
+    # Sync provider_user_id with google_id for existing rows
+    cursor.execute("UPDATE users SET provider_user_id = google_id WHERE provider_user_id IS NULL AND google_id IS NOT NULL;")
+    # Sync display_name with name
+    cursor.execute("UPDATE users SET display_name = name WHERE display_name IS NULL AND name IS NOT NULL;")
+    # Sync photo_url with picture
+    cursor.execute("UPDATE users SET photo_url = picture WHERE photo_url IS NULL AND picture IS NOT NULL;")
+
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_provider_user_id ON users(provider_user_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_auth_token ON users(auth_token);")
 
     resume_columns = [r["name"] for r in cursor.execute("PRAGMA table_info(resumes)").fetchall()]
     if "document_id" not in resume_columns:

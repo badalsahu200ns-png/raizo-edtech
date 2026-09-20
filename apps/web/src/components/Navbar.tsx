@@ -150,7 +150,7 @@ export default function Navbar({ onOpenActivity }: NavbarProps) {
                 href="/login"
                 className="rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-xs"
               >
-                Continue with Google
+                Sign In
               </Link>
             </div>
           )}

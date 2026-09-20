@@ -10,9 +10,7 @@ export interface UserProfile {
   auth_provider?: string;
   provider_user_id?: string;
   email_verified?: boolean;
-  is_google_verified?: boolean;
   onboarding_completed?: boolean;
-  google_id?: string;
   current_role: string;
   target_role: string;
   career_goal: string;
@@ -23,29 +21,13 @@ export interface UserProfile {
   last_login_at?: string;
 }
 
-export interface GoogleAuthResponse {
+export interface AuthResponse {
   success: boolean;
   token: string;
   expires_at?: string;
   is_new_user?: boolean;
   onboarding_completed?: boolean;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    display_name?: string;
-    first_name?: string;
-    last_name?: string;
-    picture?: string;
-    photo_url?: string;
-    auth_provider?: string;
-    provider_user_id?: string;
-    email_verified?: boolean;
-    is_google_verified: boolean;
-    onboarding_completed?: boolean;
-    current_role?: string;
-    target_role?: string;
-  };
+  user: UserProfile;
 }
 
 export interface Certificate {
@@ -75,14 +57,23 @@ export interface CertificateEligibilityRequirement {
 
 export interface CertificateEligibility {
   eligible: boolean;
+  is_eligible?: boolean;
   current_readiness_score: number;
   required_score: number;
+  score?: number;
+  score_threshold?: number;
+  assessment_completed?: boolean;
+  score_passed?: boolean;
+  milestones_completed?: number;
+  milestones_passed?: boolean;
   milestone_progress_percent: number;
   required_milestone_percent: number;
   has_unresolved_remediation: boolean;
   reasons: string[];
   requirements: CertificateEligibilityRequirement[];
   existing_certificate?: Certificate | null;
+  certificate?: Certificate | null;
+  message?: string;
 }
 
 export interface LearnerSkill {
@@ -195,6 +186,7 @@ export interface RoadmapDAG {
   nodes: RoadmapNode[];
   weekly_plans: WeeklyPlan[];
   completed_nodes_count: number;
+  completed_nodes?: number;
   total_nodes_count: number;
   completion_percentage: number;
 }

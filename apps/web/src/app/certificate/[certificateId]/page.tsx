@@ -68,11 +68,12 @@ export default function CertificateVerificationRoute() {
         // 1. Try backend verification endpoint
         const res = await api.verifyCertificate(certificateId);
         const cert = (res as any)?.certificate || res;
+        const savedName = typeof window !== "undefined" ? localStorage.getItem("raizo_user_name") : null;
 
         if (cert && (cert.valid || cert.status === "valid" || cert.certificate_id)) {
           setCertData({
             certificate_id: cert.certificate_id || certificateId,
-            learner_name: cert.learner_name || "Alex Rivera",
+            learner_name: cert.learner_name || cert.recipient_name || savedName || "Verified Learner",
             achievement_title: cert.achievement_title || "Data Analytics Foundations",
             target_role: cert.target_role || "Data Analyst",
             score: cert.score !== undefined ? cert.score : 84,
@@ -95,7 +96,7 @@ export default function CertificateVerificationRoute() {
         if (/^(DA|RAIZO)-\d{4}-/i.test(certificateId) || certificateId.startsWith("DA-") || certificateId.includes("CERT")) {
           setCertData({
             certificate_id: certificateId,
-            learner_name: "Alex Rivera",
+            learner_name: savedName || "Verified Learner",
             achievement_title: "Data Analytics Foundations",
             target_role: "Data Analyst",
             score: 84,

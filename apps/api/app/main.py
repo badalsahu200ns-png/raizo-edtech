@@ -14,7 +14,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirna
 from apps.api.app.database import get_connection, init_db
 from apps.api.app.security import (
     generate_auth_token,
-    verify_google_token,
     create_user_session,
     invalidate_user_session,
     get_authenticated_user_id,
@@ -25,7 +24,6 @@ from apps.api.app.security import (
     check_rate_limit
 )
 from apps.api.app.schemas import (
-    GoogleAuthRequest,
     CertificateGenerateRequest,
     UserProfileUpdate,
     ConfirmProfileRequest,
@@ -118,98 +116,82 @@ def health_check():
 
 
 # ==========================================
-# 0. GOOGLE-ONLY AUTHENTICATION & SESSIONS
+# 0. AUTHENTICATION & SESSIONS
 # ==========================================
 
-@app.post("/api/auth/google")
-def google_authentication(req: GoogleAuthRequest, request: Request):
+@app.post("/api/auth/demo")
+def demo_login(request: Request):
     """
-    Official Google Sign-In & Sign-Up verification endpoint.
-    1. Enforces client rate limiting to mitigate bot abuse and credential stuffing.
-    2. Verifies Google credential ID token (strictly disallows mock accounts in production).
-    3. Identifies if learner is an existing user or newly registering.
-    4. Creates new learner account or updates existing account.
-    5. Issues a secure session token and establishes private storage.
+    Establishes an authenticated session using the existing demo learner profile (Alex Rivera).
+    Issues a persistent session token and initializes user storage folders.
     """
     client_ip = request.client.host if request.client else "unknown_client"
     check_rate_limit(f"auth_{client_ip}", limit=20, window_seconds=60)
 
-    if not req.credential:
-        raise HTTPException(
-            status_code=400,
-            detail="Google credential token is required."
-        )
-
-    try:
-        claims = verify_google_token(req.credential)
-    except ValueError as err:
-        raise HTTPException(status_code=401, detail=str(err))
-    except Exception:
-        raise HTTPException(
-            status_code=401,
-            detail="We couldn't verify your Google account. Please try signing in again."
-        )
-
-    google_id = claims["sub"]
-    email = claims["email"]
-    name = claims["name"]
-    picture = claims.get("picture", "")
-
+    user_id = DEFAULT_USER_ID
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE google_id = ? OR email = ?", (google_id, email))
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
     user_row = cursor.fetchone()
-
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    is_new_user = user_row is None
 
-    if user_row:
-        user_id = user_row["id"]
-        cursor.execute("""
-            UPDATE users 
-            SET google_id = ?, picture = ?, is_google_verified = 1, last_login_at = ?
-            WHERE id = ?
-        """, (google_id, picture, now, user_id))
-        target_role = user_row["target_role"] or "data_analyst"
-    else:
-        # New User Registration / Sign Up
-        user_id = f"user_{uuid.uuid4().hex[:12]}"
+    if not user_row:
+        email = "alex.rivera@example.com"
+        display_name = "Alex Rivera"
         target_role = "data_analyst"
         cursor.execute("""
             INSERT INTO users (
-                id, email, name, google_id, picture, is_google_verified,
-                target_role, career_goal, timeline_months, weekly_hours,
+                id, auth_provider, email, email_verified,
+                display_name, name, first_name, last_name,
+                onboarding_completed, target_role, career_goal, timeline_months, weekly_hours,
                 settings_json, created_at, updated_at, last_login_at
-            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, 4, 8.0, ?, ?, ?, ?)
+            ) VALUES (?, 'local', ?, 1, ?, ?, 'Alex', 'Rivera', 1, ?, ?, 4, 8.0, ?, ?, ?, ?)
         """, (
-            user_id, email, name, google_id, picture, target_role,
+            user_id, email, display_name, display_name,
+            target_role,
             f"Master {target_role} competencies with personalized roadmap",
             json.dumps({"theme": "dark", "difficulty": "adaptive", "notifications": True}),
             now, now, now
         ))
+        conn.commit()
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        user_row = cursor.fetchone()
+    else:
+        cursor.execute("UPDATE users SET last_login_at = ? WHERE id = ?", (now, user_id))
+        conn.commit()
 
-    conn.commit()
     conn.close()
 
-    # Create persistent session
     session_data = create_user_session(user_id)
 
     # Ensure private user storage directories
     for folder in ["resumes", "certificates", "portfolios", "projects", "job_descriptions"]:
         os.makedirs(os.path.join(STORAGE_ROOT, user_id, folder), exist_ok=True)
 
+    user_dict = dict(user_row)
+    user_dict["onboarding_completed"] = bool(user_dict.get("onboarding_completed", 1))
+    user_dict["display_name"] = user_dict.get("display_name") or user_dict.get("name") or "Alex Rivera"
+    user_dict["photo_url"] = user_dict.get("photo_url") or user_dict.get("picture") or ""
+
     return {
         "success": True,
         "token": session_data["token"],
         "expires_at": session_data["expires_at"],
-        "is_new_user": is_new_user,
+        "is_new_user": False,
+        "onboarding_completed": user_dict["onboarding_completed"],
         "user": {
             "id": user_id,
-            "email": email,
-            "name": name,
-            "picture": picture,
-            "is_google_verified": True,
-            "target_role": target_role
+            "email": user_dict.get("email", "alex.rivera@example.com"),
+            "name": user_dict["display_name"],
+            "display_name": user_dict["display_name"],
+            "first_name": user_dict.get("first_name", "Alex"),
+            "last_name": user_dict.get("last_name", "Rivera"),
+            "picture": user_dict["photo_url"],
+            "photo_url": user_dict["photo_url"],
+            "auth_provider": "local",
+            "email_verified": True,
+            "target_role": user_dict.get("target_role", "data_analyst"),
+            "onboarding_completed": user_dict["onboarding_completed"]
         }
     }
 
@@ -229,9 +211,8 @@ def get_current_user(
     authorization: Optional[str] = Header(None)
 ):
     """
-    Returns the authenticated Google-verified user profile or unauthenticated status.
+    Returns the authenticated user profile or unauthenticated status.
     In local development sandbox, defaults to active demo learner if unauthenticated.
-    In production environments, strictly returns unauthenticated (user: None).
     """
     effective_user_id = auth_user_id
     if not authorization and not effective_user_id and is_local_demo_allowed():
@@ -247,8 +228,11 @@ def get_current_user(
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, email, name, picture, google_id, is_google_verified,
-               current_role, target_role, career_goal, timeline_months, weekly_hours 
+        SELECT id, email, name, display_name, first_name, last_name,
+               picture, photo_url, google_id, provider_user_id, auth_provider,
+               is_google_verified, email_verified, onboarding_completed,
+               current_role, target_role, career_goal, timeline_months, weekly_hours,
+               created_at, last_login_at
         FROM users WHERE id = ?
     """, (effective_user_id,))
     row = cursor.fetchone()
@@ -261,6 +245,10 @@ def get_current_user(
         }
     user_dict = dict(row)
     user_dict["is_google_verified"] = bool(user_dict.get("is_google_verified", 1))
+    user_dict["email_verified"] = bool(user_dict.get("email_verified", 1))
+    user_dict["onboarding_completed"] = bool(user_dict.get("onboarding_completed", 0))
+    user_dict["display_name"] = user_dict.get("display_name") or user_dict.get("name")
+    user_dict["photo_url"] = user_dict.get("photo_url") or user_dict.get("picture")
     return {
         "authenticated": True,
         "user": user_dict,
@@ -724,9 +712,20 @@ def update_profile(update: UserProfileUpdate, user_id: str = Depends(get_current
     now = time.strftime("%Y-%m-%d %H:%M:%S")
     conn = get_connection()
     cursor = conn.cursor()
+
+    effective_name = update.name.strip() if update.name else None
+    effective_display = update.display_name.strip() if update.display_name else effective_name
+    first_name = effective_name.split()[0] if effective_name else None
+    last_name = " ".join(effective_name.split()[1:]) if effective_name and len(effective_name.split()) > 1 else None
+    onboarding_flag = 1 if update.onboarding_completed else None
+
     cursor.execute("""
     UPDATE users
     SET name = COALESCE(?, name),
+        display_name = COALESCE(?, display_name, name),
+        first_name = COALESCE(?, first_name),
+        last_name = COALESCE(?, last_name),
+        onboarding_completed = COALESCE(?, onboarding_completed),
         current_role = COALESCE(?, current_role),
         target_role = COALESCE(?, target_role),
         career_goal = COALESCE(?, career_goal),
@@ -735,7 +734,9 @@ def update_profile(update: UserProfileUpdate, user_id: str = Depends(get_current
         updated_at = ?
     WHERE id = ?
     """, (
-        update.name, update.current_role, update.target_role,
+        effective_name, effective_display, first_name, last_name,
+        onboarding_flag,
+        update.current_role, update.target_role,
         update.career_goal, update.timeline_months, update.weekly_hours,
         now, user_id
     ))
@@ -759,6 +760,7 @@ def complete_onboarding(req: OnboardingRequest, user_id: str = Depends(get_curre
         timeline_months = ?,
         weekly_hours = ?,
         settings_json = ?,
+        onboarding_completed = 1,
         updated_at = ?
     WHERE id = ?
     """, (
@@ -1562,7 +1564,7 @@ def generate_certificate_endpoint(
     Only permitted when server-evaluated deterministic eligibility is met.
     """
     try:
-        cert = issue_certificate(user_id, req.assessment_id, req.target_role)
+        cert = issue_certificate(user_id, req.assessment_id, req.target_role, req.recipient_name)
         return {
             "success": True,
             "message": "RAIZO Certificate of Completion successfully issued and recorded in Evidence Ledger.",

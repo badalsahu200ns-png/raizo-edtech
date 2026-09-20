@@ -13,65 +13,23 @@ import {
   GitBranch,
   Terminal,
   Award,
-  Layers,
   Cpu,
-  UserCheck,
-  RefreshCw,
-  ExternalLink,
-  Copy,
-  Check,
-  HelpCircle
+  UserCheck
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import RaizoLogo from "@/components/RaizoLogo";
 import RaizoEducationIcon from "@/components/RaizoEducationIcon";
 import Card3DTilt from "@/components/3d/Card3DTilt";
 
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: any) => void;
-          renderButton: (parent: HTMLElement, options: any) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
-
 function WelcomeLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
-  const { loginWithGoogle, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { loginAsDemo, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [googleClientReady, setGoogleClientReady] = useState(false);
-  const [currentOrigin, setCurrentOrigin] = useState<string>("");
-  const [copiedOrigin, setCopiedOrigin] = useState(false);
-  const [showOriginHelper, setShowOriginHelper] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Capture current browser origin and client mount status to guarantee 100% hydration match
-  useEffect(() => {
-    setIsMounted(true);
-    if (typeof window !== "undefined") {
-      setCurrentOrigin(window.location.origin);
-    }
-  }, []);
-
-  // Local development flag: only evaluated after client mount to prevent SSR hydration mismatch
-  const isLocalDev =
-    isMounted &&
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      process.env.NODE_ENV === "development" ||
-      process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO === "true");
 
   // If already authenticated, forward immediately to target route
   useEffect(() => {
@@ -92,112 +50,21 @@ function WelcomeLoginContent() {
     }
   }, [searchParams]);
 
-  // Load Google Identity Services (GIS) script
-  useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    
-    // Check if script is already present
-    const existingScript = document.getElementById("google-gsi-script");
-    if (existingScript && window.google?.accounts?.id) {
-      initializeGoogleGSI(clientId);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "google-gsi-script";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      initializeGoogleGSI(clientId);
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // Keep script alive across client transitions to prevent re-fetch
-    };
-  }, []);
-
-  const initializeGoogleGSI = (clientId?: string) => {
-    if (!window.google?.accounts?.id) return;
-
-    // If client ID is configured, bind official GIS One-Tap & standard button
-    if (clientId) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async (response: any) => {
-          if (response.credential) {
-            await handleCredentialLogin(response.credential);
-          }
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        error_callback: (err: any) => {
-          console.warn("Google Identity Services notice:", err);
-          if (err?.type === "origin_mismatch" || String(err).includes("origin")) {
-            setShowOriginHelper(true);
-            setError(
-              `Google OAuth Error (origin_mismatch): Origin "${window.location.origin}" is not registered in Google Cloud Console.`
-            );
-          } else if (err?.type === "user_cancel" || String(err).includes("cancel") || String(err).includes("dismissed")) {
-            setError("Sign-in cancelled. Please try again.");
-          } else {
-            setError("Google sign-in is temporarily unavailable. Please try again later.");
-          }
-        }
-      });
-
-      const btnContainer = document.getElementById("google-official-btn-container");
-      if (btnContainer) {
-        window.google.accounts.id.renderButton(btnContainer, {
-          theme: "filled_blue",
-          size: "large",
-          width: "100%",
-          text: "continue_with",
-          shape: "rectangular",
-          logo_alignment: "left"
-        });
-      }
-      setGoogleClientReady(true);
-    }
-  };
-
-  const copyOriginToClipboard = () => {
-    if (!currentOrigin) return;
-    navigator.clipboard.writeText(currentOrigin);
-    setCopiedOrigin(true);
-    setTimeout(() => setCopiedOrigin(false), 2500);
-  };
-
-  const handleCredentialLogin = async (credential: string) => {
+  const handleSessionLogin = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await loginWithGoogle(credential);
-      if (res.is_new_user || !res.onboarding_completed) {
-        router.push("/onboarding");
-      } else {
-        router.push(redirectPath);
-      }
+      await loginAsDemo();
+      const hasOnboarded = typeof window !== "undefined" && Boolean(localStorage.getItem("raizo_user_name"));
+      router.push(hasOnboarded ? redirectPath : "/onboarding");
     } catch (err: any) {
       setError(
         err.message ||
-          "Google sign-in is temporarily unavailable. Please try again later."
+          "Authentication is temporarily unavailable. Please try again later."
       );
     } finally {
       setLoading(false);
     }
-  };
-
-  // Localhost-only testing handler (strictly disabled in production builds)
-  const handleLocalhostDevLogin = async () => {
-    if (!isLocalDev) {
-      setError("Demo accounts are strictly disabled in production environments.");
-      return;
-    }
-    await handleCredentialLogin(
-      "test_google:alex.rivera@example.com:Alex Rivera:demo_learner_alex:"
-    );
   };
 
   return (
@@ -321,7 +188,7 @@ function WelcomeLoginContent() {
             </div>
             <div className="flex items-center gap-2">
               <UserCheck className="h-4 w-4 text-[#38BDF8]" />
-              <span>Google Identity Verified</span>
+              <span>Verified Evidence Ledger</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#10B981]" />
@@ -331,7 +198,7 @@ function WelcomeLoginContent() {
         </div>
 
         {/* ========================================================================= */}
-        {/* RIGHT COLUMN: SECURE AUTHENTICATION CARD & PRODUCTION GOOGLE SIGN-IN      */}
+        {/* RIGHT COLUMN: SECURE AUTHENTICATION CARD                                  */}
         {/* ========================================================================= */}
         <div className="lg:col-span-5 w-full max-w-md mx-auto">
           <div className="raizo-3d-glass rounded-3xl p-7 sm:p-9 border border-[#2A3649] raizo-3d-glow-azure space-y-6 relative">
@@ -358,170 +225,32 @@ function WelcomeLoginContent() {
               </p>
             </div>
 
-            {/* Error Display with Origin Mismatch Resolution */}
+            {/* Error Display */}
             {error && (
-              <div className="rounded-xl bg-[#EF4444]/10 p-3.5 border border-[#EF4444]/30 flex flex-col gap-2.5 text-xs text-[#EF4444] animate-in fade-in">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <div className="space-y-1 flex-1">
-                    <span className="font-bold">Authentication Notice</span>
-                    <p className="text-[11px] leading-snug">{error}</p>
-                  </div>
+              <div className="rounded-xl bg-[#EF4444]/10 p-3.5 border border-[#EF4444]/30 flex items-start gap-2 text-xs text-[#EF4444] animate-in fade-in">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="space-y-1 flex-1">
+                  <span className="font-bold">Authentication Notice</span>
+                  <p className="text-[11px] leading-snug">{error}</p>
                 </div>
-
-                {(error.includes("origin_mismatch") || showOriginHelper) && (
-                  <div className="mt-1 pt-2 border-t border-[#EF4444]/20 space-y-2 text-[11px] text-[#F5F7FA]">
-                    <p className="text-[#38BDF8] font-semibold">
-                      Fix in Google Cloud Console in 30 seconds:
-                    </p>
-                    <div className="flex items-center gap-2 bg-[#0B0F14] px-2.5 py-1.5 rounded-lg border border-[#222A36]">
-                      <code className="text-[#38BDF8] text-[10px] font-mono break-all flex-1">
-                        {currentOrigin || "Loading origin..."}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={copyOriginToClipboard}
-                        className="p-1.5 rounded bg-[#0EA5E9]/20 hover:bg-[#0EA5E9]/30 text-[#38BDF8] shrink-0 flex items-center gap-1 text-[10px] font-bold transition-all cursor-pointer"
-                      >
-                        {copiedOrigin ? (
-                          <>
-                            <Check className="h-3 w-3 text-[#10B981]" />
-                            <span className="text-[#10B981]">Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3 w-3" />
-                            <span>Copy Origin</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-[#A7B0BC] leading-relaxed">
-                      Paste this exact URI into <strong>Authorized JavaScript origins</strong> in Google Cloud Console.
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Official Google Identity Services Container */}
-            <div id="google-official-btn-container" className="min-h-[44px] flex justify-center w-full" />
-
-            {/* Standard Primary Google Authentication Button */}
+            {/* Primary Session Authentication Button */}
             <div>
               <button
-                onClick={() => {
-                  if (window.google?.accounts?.id) {
-                    window.google.accounts.id.prompt();
-                  } else {
-                    setError(
-                      "Google Identity Services is initializing. If this persists, verify internet access to accounts.google.com."
-                    );
-                  }
-                }}
+                onClick={handleSessionLogin}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-[#2C384A] bg-[#11161D] hover:bg-[#161D26] hover:border-[#0EA5E9] text-xs sm:text-sm font-bold text-[#F5F7FA] shadow-md transition-all duration-200 disabled:opacity-60 group cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl bg-gradient-to-r from-[#0EA5E9] to-[#38BDF8] hover:from-[#0284C7] hover:to-[#0EA5E9] text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#0EA5E9]/20 transition-all duration-200 disabled:opacity-60 group cursor-pointer"
               >
-                {/* Official Google G 4-Color SVG */}
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>{loading ? "Verifying Google Account..." : "Continue with Google"}</span>
-                <ArrowRight className="h-4 w-4 text-[#7E8996] group-hover:text-[#38BDF8] group-hover:translate-x-0.5 transition-all ml-auto" />
+                <Sparkles className="h-4 w-4 shrink-0" />
+                <span>{loading ? "Starting RAIZO Session..." : "Continue to RAIZO"}</span>
+                <ArrowRight className="h-4 w-4 text-white/80 group-hover:translate-x-0.5 transition-all ml-auto" />
               </button>
-            </div>
-
-            {/* Origin & OAuth Setup Helper Toggle */}
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => setShowOriginHelper(!showOriginHelper)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-[#151B24]/80 border border-[#273546] text-[11px] text-[#A7B0BC] hover:text-[#38BDF8] hover:border-[#0EA5E9]/40 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-1.5 font-medium">
-                  <HelpCircle className="h-3.5 w-3.5 text-[#0EA5E9]" />
-                  <span>Google OAuth Origin & Public Access Guide</span>
-                </div>
-                <span className="text-[10px] text-[#38BDF8] font-bold">
-                  {showOriginHelper ? "Hide" : "Resolve Error 400"}
-                </span>
-              </button>
-
-              {showOriginHelper && (
-                <div className="mt-2 p-3.5 rounded-xl bg-[#0B0F14] border border-[#222A36] space-y-3 text-[11px] text-[#B4BDC8] animate-in fade-in">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-[#F5F7FA] uppercase tracking-wider">
-                      1. Register this exact Origin:
-                    </span>
-                    <div className="flex items-center gap-2 bg-[#11161D] px-2.5 py-1.5 rounded-lg border border-[#2A3649]">
-                      <code className="text-[#38BDF8] text-[10px] font-mono break-all flex-1">
-                        {currentOrigin || "http://localhost:3000"}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={copyOriginToClipboard}
-                        className="p-1.5 rounded bg-[#0EA5E9]/20 hover:bg-[#0EA5E9]/30 text-[#38BDF8] shrink-0 flex items-center gap-1 text-[10px] font-bold transition-all cursor-pointer"
-                      >
-                        {copiedOrigin ? (
-                          <>
-                            <Check className="h-3 w-3 text-[#10B981]" />
-                            <span className="text-[#10B981]">Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3 w-3" />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-[10px] text-[#A7B0BC]">
-                    <p className="font-semibold text-[#F5F7FA]">
-                      2. In Google Cloud Console (APIs & Services → Credentials):
-                    </p>
-                    <ul className="list-disc pl-4 space-y-0.5">
-                      <li>Open your OAuth 2.0 Web Client ID.</li>
-                      <li>Under <strong>Authorized JavaScript origins</strong>, add the origin copied above (no trailing slash).</li>
-                      <li>Under <strong>Authorized redirect URIs</strong>, add the same URI.</li>
-                      <li>Click <strong>Save</strong>.</li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-1 text-[10px] text-[#A7B0BC] pt-1 border-t border-[#222A36]">
-                    <p className="font-semibold text-[#10B981]">
-                      3. Allow ANYONE to Sign In (Remove Testing Block):
-                    </p>
-                    <p>
-                      In Google Cloud Console → <strong>OAuth consent screen</strong>, change Publishing status from <em>Testing</em> to <strong>In production</strong> (click <em>"Publish App"</em>).
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Security Guarantees */}
-            <div className="space-y-2 pt-2 text-[11px] text-[#A7B0BC] leading-relaxed">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
-                <span>Production access requires a verified Google / Gmail account.</span>
-              </div>
+            <div className="space-y-2 pt-2 text-[11px] text-[#A7B0BC] leading-relaxed border-t border-[#222A36]">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
                 <span>Encrypted session tokens with automatic sliding revocation.</span>
@@ -530,38 +259,11 @@ function WelcomeLoginContent() {
                 <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
                 <span>Anti-bot rate limiting & server-side authorization enforced.</span>
               </div>
-            </div>
-
-            {/* ========================================================================= */}
-            {/* LOCALHOST DEVELOPMENT ONLY SANDBOX (STRIP IN PRODUCTION BUILDS)           */}
-            {/* ========================================================================= */}
-            {isLocalDev && (
-              <div className="pt-4 mt-2 border-t border-dashed border-[#F59E0B]/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#F59E0B] uppercase tracking-wider">
-                    <Terminal className="h-3.5 w-3.5" />
-                    <span>Localhost Dev Sandbox</span>
-                  </div>
-                  <span className="text-[9px] font-mono font-bold text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/20">
-                    ENV: DEV ONLY
-                  </span>
-                </div>
-
-                <p className="text-[10px] text-[#A7B0BC] leading-tight">
-                  This developer shortcut is only visible on localhost/testing environments and is disabled in production builds.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={handleLocalhostDevLogin}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-[#F59E0B]/40 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#F59E0B] text-xs font-bold transition-all disabled:opacity-60 cursor-pointer"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Launch Localhost Demo (Alex Rivera)</span>
-                </button>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
+                <span>Zero passwords stored, persistent local learner state.</span>
               </div>
-            )}
+            </div>
 
             {/* Terms & Privacy Disclaimer */}
             <div className="pt-2 text-center text-[11px] text-[#A7B0BC]">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { UserProfile, GoogleAuthResponse } from "./types";
+import { UserProfile, AuthResponse } from "./types";
 import { api } from "./api";
 
 interface AuthContextType {
@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  loginWithGoogle: (credential: string) => Promise<GoogleAuthResponse>;
+  login: () => Promise<AuthResponse>;
   loginAsDemo: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -78,11 +78,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession();
   }, [checkSession]);
 
-  const loginWithGoogle = async (credential: string): Promise<GoogleAuthResponse> => {
+  const login = async (): Promise<AuthResponse> => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.googleAuth(credential);
+      const res = await api.demoLogin();
       if (res && res.success && res.token) {
         if (typeof window !== "undefined") {
           localStorage.setItem("raizo_token", res.token);
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Authentication was unsuccessful. Please try again.");
       }
     } catch (err: any) {
-      const msg = err.message || "Failed to authenticate with Google.";
+      const msg = err.message || "Failed to establish active session.";
       setError(msg);
       throw err;
     } finally {
@@ -104,17 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginAsDemo = async (): Promise<void> => {
-    const isLocalDev =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        process.env.NODE_ENV === "development" ||
-        process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO === "true");
-
-    if (!isLocalDev) {
-      throw new Error("Demo accounts are strictly disabled in production builds and deployments.");
-    }
-    await loginWithGoogle("test_google:alex.rivera@example.com:Alex Rivera:demo_learner_alex:");
+    await login();
   };
 
   const logout = async (): Promise<void> => {
@@ -156,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user && !!token,
         error,
-        loginWithGoogle,
+        login,
         loginAsDemo,
         logout,
         refreshUser,

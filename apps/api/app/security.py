@@ -10,28 +10,18 @@ from typing import Optional, Dict, Any, List
 from fastapi import Header, HTTPException, Depends, Request
 import httpx
 
-try:
-    from google.oauth2 import id_token
-    from google.auth.transport import requests as google_requests
-    HAS_GOOGLE_AUTH = True
-except ImportError:
-    HAS_GOOGLE_AUTH = False
-
 from apps.api.app.database import get_connection
 
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 SECRET_KEY = os.getenv("SECRET_KEY", "raizo_production_secret_key_2026_badal_sahu")
 
 ALLOW_LOCAL_DEMO: Optional[bool] = (
-    os.getenv("ALLOW_LOCAL_DEMO", "false").lower() in ("true", "1", "yes")
+    os.getenv("ALLOW_LOCAL_DEMO", "true").lower() in ("true", "1", "yes")
     or os.getenv("ENVIRONMENT", "production").lower() in ("development", "dev", "local", "test")
 )
 
 def is_local_demo_allowed() -> bool:
     """
-    Returns True only if local demo environment is enabled.
-    In production environments, this returns False to ensure strict security.
+    Returns True if demo/local session mechanism is enabled (default true).
     """
     global ALLOW_LOCAL_DEMO
     if ALLOW_LOCAL_DEMO is False:
@@ -39,7 +29,7 @@ def is_local_demo_allowed() -> bool:
     if ALLOW_LOCAL_DEMO is True:
         return True
     return bool(
-        os.getenv("ALLOW_LOCAL_DEMO", "false").lower() in ("true", "1", "yes")
+        os.getenv("ALLOW_LOCAL_DEMO", "true").lower() in ("true", "1", "yes")
         or os.getenv("ENVIRONMENT", "production").lower() in ("development", "dev", "local", "test")
     )
 
@@ -78,106 +68,7 @@ def generate_auth_token() -> str:
     return secrets.token_urlsafe(48)
 
 
-def verify_google_token(credential_str: str) -> Dict[str, Any]:
-    """
-    Verifies a Google credential.
-    In production:
-      - Strictly requires a verified Google account.
-      - Blocks arbitrary, simulated, or mock accounts.
-      - Validates token against official Google endpoints.
-      - Confirms email_verified is True.
-    In localhost development/testing (when ALLOW_LOCAL_DEMO=True):
-      - Permits test credentials for automated tests and developer sandboxing.
-    """
-    token = credential_str.strip()
-    if not token:
-        raise ValueError("Google credential token cannot be empty.")
 
-    # 1. Development / Testing Mock Google Credential Check
-    if token.startswith("test_google:") or token.startswith("mock_google:"):
-        if not is_local_demo_allowed():
-            raise ValueError(
-                "Simulated and mock credentials are strictly disabled in production. "
-                "A verified Google account is required."
-            )
-        parts = token.split(":")
-        email = parts[1].strip().lower() if len(parts) > 1 and parts[1].strip() else "new.learner@example.com"
-        name = parts[2].strip() if len(parts) > 2 and parts[2].strip() else email.split("@")[0].replace(".", " ").title()
-        google_id = parts[3].strip() if len(parts) > 3 and parts[3].strip() else f"gid_{hashlib.sha256(email.encode()).hexdigest()[:16]}"
-        picture = parts[4].strip() if len(parts) > 4 else ""
-        return {
-            "sub": google_id,
-            "email": email,
-            "email_verified": True,
-            "name": name,
-            "picture": picture
-        }
-
-    # 2. Official google.oauth2.id_token verification
-    if HAS_GOOGLE_AUTH:
-        try:
-            req = google_requests.Request()
-            audience = GOOGLE_CLIENT_ID if GOOGLE_CLIENT_ID else None
-            payload = id_token.verify_oauth2_token(token, req, audience=audience)
-            if payload.get("iss") not in ["accounts.google.com", "https://accounts.google.com"]:
-                raise ValueError("Token has invalid Google issuer.")
-            if not payload.get("email_verified", True):
-                raise ValueError("Google account email is not verified.")
-            return {
-                "sub": payload["sub"],
-                "email": payload["email"].lower(),
-                "email_verified": True,
-                "name": payload.get("name") or payload["email"].split("@")[0].capitalize(),
-                "picture": payload.get("picture", "")
-            }
-        except Exception:
-            pass
-
-    # 3. Resilient fallback to Google tokeninfo endpoint
-    try:
-        resp = httpx.get(
-            f"https://oauth2.googleapis.com/tokeninfo?id_token={token}",
-            timeout=10.0
-        )
-        if resp.status_code == 200:
-            payload = resp.json()
-            if payload.get("iss") not in ["accounts.google.com", "https://accounts.google.com"]:
-                raise ValueError("Token has invalid Google issuer.")
-            if GOOGLE_CLIENT_ID and payload.get("aud") != GOOGLE_CLIENT_ID:
-                raise ValueError("Audience mismatch against configured GOOGLE_CLIENT_ID.")
-            email_verified = payload.get("email_verified") in [True, "true"]
-            if not email_verified:
-                raise ValueError("Google account email is not verified.")
-            return {
-                "sub": payload["sub"],
-                "email": payload["email"].lower(),
-                "email_verified": True,
-                "name": payload.get("name") or payload["email"].split("@")[0].capitalize(),
-                "picture": payload.get("picture", "")
-            }
-    except Exception:
-        pass
-
-    # 4. Fallback for JWT parsing in local development if token contains valid claims
-    if ALLOW_LOCAL_DEMO and "." in token:
-        try:
-            segments = token.split(".")
-            if len(segments) >= 2:
-                padding = "=" * (4 - len(segments[1]) % 4)
-                decoded_bytes = base64.urlsafe_b64decode(segments[1] + padding)
-                payload = json.loads(decoded_bytes.decode("utf-8"))
-                if "email" in payload:
-                    return {
-                        "sub": payload.get("sub", f"gid_{hashlib.sha256(payload['email'].encode()).hexdigest()[:16]}"),
-                        "email": payload["email"].lower(),
-                        "email_verified": True,
-                        "name": payload.get("name") or payload["email"].split("@")[0].capitalize(),
-                        "picture": payload.get("picture", "")
-                    }
-        except Exception:
-            pass
-
-    raise ValueError("Failed to verify identity with Google authentication servers.")
 
 
 def create_user_session(user_id: str, days: int = 7) -> Dict[str, Any]:
@@ -291,5 +182,5 @@ def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
 
     raise HTTPException(
         status_code=401,
-        detail="Authentication required. Please sign in with a verified Google account."
+        detail="Authentication required. Please sign in."
     )

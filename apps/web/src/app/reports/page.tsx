@@ -16,10 +16,15 @@ import {
   ChevronRight
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 export default function ReportsPage() {
+  const { user } = useAuth();
   const [report, setReport] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const savedName = typeof window !== "undefined" ? localStorage.getItem("raizo_user_name") : null;
+  const learnerName = (user?.name && user.name !== "Alex Rivera" ? user.name : null) || savedName || user?.name || "Verified Learner";
 
   useEffect(() => {
     async function loadReport() {
@@ -58,7 +63,7 @@ export default function ReportsPage() {
           Career Readiness Progression
         </h1>
         <p className="raizo-page-desc">
-          Generated on {report.generated_at || "September 2026"} for Alex Rivera • Target Role: Data Analyst
+          Generated on {report.generated_at || "September 2026"} for {learnerName} • Target Role: Data Analyst
         </p>
         <div className="flex items-center gap-2 text-xs font-semibold text-[#B4BDC8] pt-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#7E8996]">Timeline:</span>

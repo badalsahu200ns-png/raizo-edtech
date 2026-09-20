@@ -2,19 +2,17 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 
 
-class GoogleAuthRequest(BaseModel):
-    credential: Optional[str] = None  # Google ID token string
-    code: Optional[str] = None        # OAuth 2.0 authorization code
-    redirect_uri: Optional[str] = None
-
 
 class CertificateGenerateRequest(BaseModel):
     assessment_id: Optional[str] = None
     target_role: Optional[str] = None
+    recipient_name: Optional[str] = None
 
 
 class UserProfileUpdate(BaseModel):
     name: Optional[str] = None
+    display_name: Optional[str] = None
+    onboarding_completed: Optional[bool] = None
     current_role: Optional[str] = None
     target_role: Optional[str] = None
     career_goal: Optional[str] = None

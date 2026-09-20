@@ -108,7 +108,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <RaizoLogo size={42} />
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#11161D] border border-[#222A36] text-xs text-[#38BDF8]">
             <span className="h-2 w-2 rounded-full bg-[#0EA5E9] animate-ping" />
-            <span>Verifying Google Authentication...</span>
+            <span>Verifying Authentication...</span>
           </div>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           </div>
                         </div>
                         <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 px-1.5 py-0.5 rounded">
-                          ✓ Google Verified
+                          ✓ Verified Learner
                         </span>
                       </div>
 
@@ -256,7 +256,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   className="inline-flex items-center space-x-1.5 rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] text-white px-3.5 py-1.5 text-xs font-bold transition-all shadow-xs"
                 >
                   <User className="h-3.5 w-3.5" />
-                  <span>Continue with Google</span>
+                  <span>Sign In</span>
                 </Link>
               </div>
             )}
@@ -504,7 +504,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-[#0EA5E9] hover:bg-[#38BDF8] text-white text-xs font-bold transition-all shadow-xs"
                   >
                     <User className="h-3.5 w-3.5" />
-                    <span>Continue with Google</span>
+                    <span>Sign In</span>
                   </Link>
                 </div>
               )}

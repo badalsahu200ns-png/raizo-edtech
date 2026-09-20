@@ -26,9 +26,18 @@ import { api } from "@/lib/api";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser, logout, refreshUser } = useAuth();
   const [user, setUser] = useState<any>(null);
-  const [name, setName] = useState("Alex Rivera");
+  const [name, setName] = useState<string>("");
+
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("raizo_user_name") : null;
+    if (authUser?.name && authUser.name !== "Alex Rivera") {
+      setName(authUser.name);
+    } else if (saved) {
+      setName(saved);
+    }
+  }, [authUser]);
   const [currentRole, setCurrentRole] = useState("Junior Business Analyst");
   const [targetRole, setTargetRole] = useState("data_analyst");
   const [careerGoal, setCareerGoal] = useState("Transition to Mid-Level Data Analyst at a tech company");
@@ -65,15 +74,21 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
+    const cleanName = name.trim();
     try {
       await api.updateProfile({
-        name,
+        name: cleanName,
+        display_name: cleanName,
         current_role: currentRole,
         target_role: targetRole,
         career_goal: careerGoal,
         weekly_hours: weeklyHours,
         timeline_months: timelineMonths
       });
+      if (typeof window !== "undefined" && cleanName) {
+        localStorage.setItem("raizo_user_name", cleanName);
+      }
+      await refreshUser();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
@@ -401,10 +416,10 @@ export default function ProfilePage() {
             </span>
           </div>
           <h3 className="text-lg font-bold text-[#F5F7FA]">
-            Connected Google Identity
+            Active Learner Identity
           </h3>
           <p className="text-xs text-[#B4BDC8]">
-            Your session is authenticated via official Google OAuth with cryptographic token validation.
+            Your session is authenticated with cryptographic session token validation.
           </p>
         </div>
 
@@ -416,7 +431,7 @@ export default function ProfilePage() {
               </span>
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#36C98F] bg-[#5B8DEF]/10 px-2 py-0.5 rounded-full border border-[#2F7D5C]/30">
                 <CheckCircle2 className="h-3 w-3" />
-                Google Verified
+                Verified Learner
               </span>
             </div>
             <p className="text-[11px] text-[#B4BDC8]">

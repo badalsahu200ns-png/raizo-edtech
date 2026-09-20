@@ -442,7 +442,8 @@ def draw_certificate_pdf(cert_data: Dict[str, Any], qr_bytes: bytes, output_path
 def issue_certificate(
     user_id: str,
     assessment_id: Optional[str] = None,
-    target_role: Optional[str] = None
+    target_role: Optional[str] = None,
+    recipient_name: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Generates, persists, and signs a new verified RAIZO completion certificate.
@@ -461,7 +462,11 @@ def issue_certificate(
         conn.close()
         raise ValueError("User not found.")
 
-    learner_name = user_row["name"] or user_row["email"].split("@")[0].capitalize()
+    learner_name = (recipient_name or "").strip() or user_row["name"] or user_row["email"].split("@")[0].capitalize()
+    if recipient_name and recipient_name.strip() and user_row["name"] != recipient_name.strip():
+        cursor.execute("UPDATE users SET name = ?, display_name = ? WHERE id = ?", (learner_name, learner_name, user_id))
+        conn.commit()
+
     effective_role = target_role or user_row["target_role"] or "data_analyst"
     role_title = format_role_title(effective_role)
     achievement_title = f"{role_title} Foundations"

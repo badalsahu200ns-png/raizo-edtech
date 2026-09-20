@@ -8,7 +8,7 @@ import {
   EvaluationResult,
   TutorMessage,
   AuditLogEntry,
-  GoogleAuthResponse,
+  AuthResponse,
   Certificate,
   CertificateEligibility,
   JobListing,
@@ -52,11 +52,10 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 }
 
 export const api = {
-  // Google Authentication Only
-  googleAuth: (credential: string) =>
-    fetchAPI<GoogleAuthResponse>("/auth/google", {
-      method: "POST",
-      body: JSON.stringify({ credential })
+  // Session Authentication
+  demoLogin: () =>
+    fetchAPI<AuthResponse>("/auth/demo", {
+      method: "POST"
     }),
 
   logout: () =>

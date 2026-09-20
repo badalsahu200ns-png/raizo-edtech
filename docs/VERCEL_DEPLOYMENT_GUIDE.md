@@ -18,7 +18,6 @@ This guide provides exhaustive, end-to-end instructions for deploying the **RAIZ
 Before you begin, ensure you have:
 1. A **GitHub account** ([github.com](https://github.com)).
 2. A **Vercel account** ([vercel.com](https://vercel.com)) connected to your GitHub account.
-3. Access to **Google Cloud Console** ([console.cloud.google.com](https://console.cloud.google.com)) for Google Sign-In credentials.
 
 ---
 
@@ -64,7 +63,7 @@ Because Vercel provides a serverless Edge/Node.js environment, the Python FastAP
 5. Add Environment Variables in Render:
    - `GEMINI_API_KEY`: *(Your Google Gemini API Key, if available)*
    - `DATABASE_URL`: `sqlite:///raizo_learning.db`
-   - `ALLOW_LOCAL_DEMO`: `false` (enforces strict production Google authorization)
+   - `ALLOW_LOCAL_DEMO`: `true` (enables learner session access)
 6. Click **Create Web Service**.
 7. Once deployed, copy your API URL:
    `https://raizo-api.onrender.com`
@@ -72,34 +71,7 @@ Because Vercel provides a serverless Edge/Node.js environment, the Python FastAP
 
 ---
 
-## STEP 3: Configure Google OAuth 2.0 Credentials
-
-Production RAIZO requires verified Google accounts for secure authentication:
-
-1. Open [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
-2. Create or select your Google Cloud Project (e.g. `raizo-edtech`).
-3. Configure the **OAuth Consent Screen**:
-   - User Type: **External**
-   - App Name: `RAIZO`
-   - User Support Email: *(Your Gmail)*
-   - Developer Contact Email: *(Your Gmail)*
-   - Scopes: `openid`, `email`, `profile`
-4. Go to **Credentials** → **Create Credentials** → **OAuth Client ID**:
-   - Application Type: **Web application**
-   - Name: `RAIZO Web Client`
-   - **Authorized JavaScript Origins**:
-     - `http://localhost:3000` (for local development)
-     - `https://raizo-edtech.vercel.app` (your Vercel project domain)
-     - `https://*.vercel.app`
-   - **Authorized Redirect URIs**:
-     - `http://localhost:3000`
-     - `https://raizo-edtech.vercel.app`
-5. Click **Create** and copy your **Client ID**:
-   Example: `1029384756-abcdefg12345.apps.googleusercontent.com`
-
----
-
-## STEP 4: Deploy the Frontend to Vercel
+## STEP 3: Deploy the Frontend to Vercel
 
 1. Navigate to [vercel.com/new](https://vercel.com/new).
 2. Under **Import Git Repository**, find:
@@ -126,14 +98,12 @@ Expand the **Environment Variables** section and add the following:
 | Key | Value | Notes |
 | :--- | :--- | :--- |
 | `NEXT_PUBLIC_API_URL` | `https://raizo-api.onrender.com/api` | Replace with your live backend API URL |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | `YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com` | Obtained from Step 3 |
-| `NEXT_PUBLIC_ENABLE_LOCAL_DEMO` | `false` | Disables localhost sandbox in production |
 
 4. Click the blue **Deploy** button.
 
 ---
 
-## STEP 5: Verification & Post-Deployment Checklist
+## STEP 4: Verification & Post-Deployment Checklist
 
 Vercel will build the application in approximately 1 to 2 minutes. When completed, you will see the celebration screen with your live deployment URL (e.g. `https://raizo-edtech.vercel.app`).
 
@@ -143,11 +113,10 @@ Vercel will build the application in approximately 1 to 2 minutes. When complete
    - Hero title: *"Welcome to RAIZO"*
    - Subtitle: *"Learn. Practice. Prove. Prepare for your Career."*
    - Interactive 3D Education & AI emblem and tilt cards.
-3. Test **Google Sign-In**:
-   - Click **"Continue with Google"**.
-   - Verify that your Gmail account authenticates and securely redirects to `/dashboard`.
+3. Test **Session Sign-In**:
+   - Click **"Start Learning Session"**.
+   - Verify that your learner session authenticates and securely redirects to `/dashboard`.
 4. Check **Trust Badges & Security**:
-   - Confirm the localhost sandbox block is hidden.
    - Confirm SSL padlock (`HTTPS`) is active.
 
 ---
